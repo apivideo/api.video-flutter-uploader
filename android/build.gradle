@@ -38,4 +38,6 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'video.api:android-video-uploader:0.0.7'
+    implementation 'com.google.code.gson:gson:2.8.8'
+
 }

@@ -2,6 +2,7 @@ package video.api.uploader.apivideouploader
 
 import android.util.Log
 import androidx.annotation.NonNull
+import com.google.gson.Gson
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -17,6 +18,8 @@ import video.api.videouploader_module.VideoUploader
 import java.io.File
 import java.io.IOException
 import java.net.URI
+import java.util.*
+import kotlin.collections.HashMap
 
 /** ApivideouploaderPlugin */
 class ApivideouploaderPlugin: FlutterPlugin, MethodCallHandler {
@@ -38,39 +41,44 @@ class ApivideouploaderPlugin: FlutterPlugin, MethodCallHandler {
         //val fileName = call.argument<String>("fileName")
         val filePath = call.argument<String>("filePath")
         if (token != null && filePath != null) {
-          var json = uploadVideo(token, filePath)
-          if(json != null){
-            result.success(json)
-          }else{
-            result.notImplemented()
-          }
+          uploadVideo(token, filePath, object : CallBack{
+            override fun onError(apiError: ApiError) {
+              result.notImplemented()
+            }
 
+            override fun onFatal(e: IOException) {
+              result.notImplemented()
+            }
+
+            override fun onSuccess(res: JSONObject) {
+              result.success(res.toString())
+            }
+          })
         }
       }
     }
   }
 
-  private fun uploadVideo(token: String, filePath: String): JSONObject?{
+  private fun uploadVideo(token: String, filePath: String, callBack: CallBack){
     val client = OkHttpClient()
-    val uploader = VideoUploader("https://sandbox.api.video", UploaderRequestExecutorImpl(client), client)
+    val uploader = VideoUploader("https://ws.api.video", UploaderRequestExecutorImpl(client), client)
     val uri = URI(filePath)
     val file = File(uri.path)
     var json: JSONObject? = null
     uploader.uploadWithDelegatedToken(token,file,object : CallBack {
       override fun onError(apiError: ApiError) {
-        Log.e("error", apiError.toString())
+        callBack.onError(apiError)
       }
 
       override fun onFatal(e: IOException) {
-        Log.e("fatal", e.toString())
+        callBack.onFatal(e)
       }
 
       override fun onSuccess(result: JSONObject) {
-        Log.i("json", result.toString())
         json = result
+        callBack.onSuccess(json!!)
       }
     })
-    return json
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
