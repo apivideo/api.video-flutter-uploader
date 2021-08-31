@@ -61,7 +61,7 @@ class ApivideouploaderPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun uploadVideo(token: String, filePath: String, callBack: CallBack){
     val client = OkHttpClient()
-    val uploader = VideoUploader("https://sandbox.api.video", UploaderRequestExecutorImpl(client), client)
+    val uploader = VideoUploader("https://ws.api.video", UploaderRequestExecutorImpl(client), client)
     val uri = URI(filePath)
     val file = File(uri.path)
     var json: JSONObject? = null
