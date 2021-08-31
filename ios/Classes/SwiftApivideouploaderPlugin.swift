@@ -19,7 +19,13 @@ public class SwiftApivideouploaderPlugin: NSObject, FlutterPlugin {
             {
                 upload(delegatedToken: token, fileName: fileName, filePath: filePath){ (json, error) in
                     if(error == nil){
-                        result(json)
+                        if let jsonData = try? JSONSerialization.data(
+                            withJSONObject: json as Any,
+                            options: []) {
+                            let jsonString = String(data: jsonData,
+                                                       encoding: .ascii)
+                            result(theJSONText)
+                        }
                     }else{
                         result(FlutterError.init(code: (error?.statusCode)!, message: error?.message, details: nil))
                     }

@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+
 import 'package:apivideouploader/apivideouploader.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -96,8 +99,8 @@ class _MyAppState extends State<MyApp> {
                 ),
                 onPressed: () async {
                   var json = await ApiVideoUploader.uploadVideo("tofLE0dYEe1vqtxBWFotDAM",_imageName , _imagePath, _imagePath);
-                  var toto = json;
-
+                  log("JSON : $json");
+                  log("Title : ${json!["title"]}");
                 },
               ),
             ],
