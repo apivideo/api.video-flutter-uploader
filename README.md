@@ -7,7 +7,7 @@ This flutter plugin is an easy way to upload video to api.video.
 Add this to your package's pubspec.yaml file, use the latest version
 ``` yaml
 dependencies:
-  flutter_video_uploader: ^latest_version
+  apivideouploader: ^latest_version
 ```
 
 
