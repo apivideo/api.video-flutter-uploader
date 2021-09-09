@@ -1,5 +1,5 @@
 PODS:
-  - apivideouploader (0.0.1):
+  - apivideouploader (0.0.2):
     - Flutter
     - VideoUploaderIos (~> 0.0.1)
   - Flutter (1.0.0)
