@@ -24,7 +24,7 @@ public class SwiftApivideouploaderPlugin: NSObject, FlutterPlugin {
                             options: []) {
                             let jsonString = String(data: jsonData,
                                                        encoding: .ascii)
-                            result(theJSONText)
+                            result(jsonString)
                         }
                     }else{
                         result(FlutterError.init(code: (error?.statusCode)!, message: error?.message, details: nil))

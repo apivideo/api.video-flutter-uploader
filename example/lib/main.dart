@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-
 import 'package:apivideouploader/apivideouploader.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -16,7 +15,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   var _imageFile;
   var _imageName;
   var _imagePath;
@@ -32,80 +30,72 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 52,
-              ),
-              Center(
-                child: GestureDetector(
-                  onTap: () async {
-
-                  },
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                        color: Colors.red[200]),
-                    child: _imageFile != null
-                        ? Image.file(
-                      _imageFile,
-                      width: 200.0,
-                      height: 200.0,
-                      fit: BoxFit.fitHeight,
-                    )
-                        : Container(
-                      decoration: BoxDecoration(
-                          color: Colors.red[200]),
-                      width: 200,
-                      height: 200,
-                      child: Icon(
-                        Icons.camera_alt,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                  ),
+            child: Column(
+          children: [
+            SizedBox(
+              height: 52,
+            ),
+            Center(
+              child: GestureDetector(
+                onTap: () async {},
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(color: Colors.red[200]),
+                  child: _imageFile != null
+                      ? Image.file(
+                          _imageFile,
+                          width: 200.0,
+                          height: 200.0,
+                          fit: BoxFit.fitHeight,
+                        )
+                      : Container(
+                          decoration: BoxDecoration(color: Colors.red[200]),
+                          width: 200,
+                          height: 200,
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.grey[800],
+                          ),
+                        ),
                 ),
               ),
-              MaterialButton(
-                color: Colors.blue,
-                child: Text(
-                  "Pick Image from Gallery",
-                  style: TextStyle(
-                      color: Colors.white70, fontWeight: FontWeight.bold),
-                ),
-                onPressed: () async {
-                  var source = ImageSource.gallery;
-                  XFile? image = await _picker.pickVideo(
-                      source: source);
-                  setState(() {
-                    try{
-                      _imageName = image!.name;
-                      _imagePath = image!.path;
-                      _imageFile = File(image!.path);
-                    }catch(e){
-
-                    }
-
-                  });
-                },
+            ),
+            MaterialButton(
+              color: Colors.blue,
+              child: Text(
+                "Pick Image from Gallery",
+                style: TextStyle(
+                    color: Colors.white70, fontWeight: FontWeight.bold),
               ),
-              MaterialButton(
-                color: Colors.blue,
-                child: Text(
-                  "Upload video",
-                  style: TextStyle(
-                      color: Colors.white70, fontWeight: FontWeight.bold),
-                ),
-                onPressed: () async {
-                  var json = await ApiVideoUploader.uploadVideo("tofLE0dYEe1vqtxBWFotDAM",_imageName , _imagePath, _imagePath);
-                  log("JSON : $json");
-                  log("Title : ${json!["title"]}");
-                },
+              onPressed: () async {
+                var source = ImageSource.gallery;
+                XFile? image = await _picker.pickVideo(source: source);
+                setState(() {
+                  try {
+                    _imageName = image!.name;
+                    _imagePath = image!.path;
+                    _imageFile = File(image!.path);
+                  } catch (e) {}
+                });
+              },
+            ),
+            MaterialButton(
+              color: Colors.blue,
+              child: Text(
+                "Upload video",
+                style: TextStyle(
+                    color: Colors.white70, fontWeight: FontWeight.bold),
               ),
-            ],
-          )
-        ),
+              onPressed: () async {
+                var json = await ApiVideoUploader.uploadVideo(
+                    "YOUR_TOKEN", _imageName, _imagePath);
+                log("JSON : $json");
+                log("Title : ${json!["title"]}");
+              },
+            ),
+          ],
+        )),
       ),
     );
   }
