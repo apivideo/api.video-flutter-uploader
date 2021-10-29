@@ -6,6 +6,8 @@
 
 ![](https://github.com/apivideo/API_OAS_file/blob/master/apivideo_banner.png)
 
+api.video is an API that encodes on the go to facilitate immediate playback, enhancing viewer streaming experiences across multiple devices and platforms. You can stream live or on-demand online videos within minutes.
+
 # flutter-video-uploader
 
 This flutter plugin is an easy way to upload video to api.video.
