@@ -1,16 +1,24 @@
-[![badge](https://img.shields.io/twitter/follow/api_video?style=social)](https://twitter.com/intent/follow?screen_name=api_video)
-
-[![badge](https://img.shields.io/github/stars/apivideo/flutter-video-uploader?style=social)](https://github.com/apivideo/flutter-video-uploader)
-
-[![badge](https://img.shields.io/discourse/topics?server=https%3A%2F%2Fcommunity.api.video)](https://community.api.video)
-
+[![badge](https://img.shields.io/twitter/follow/api_video?style=social)](https://twitter.com/intent/follow?screen_name=api_video) &nbsp; [![badge](https://img.shields.io/github/stars/apivideo/api.video-flutter-uploader?style=social)](https://github.com/apivideo/api.video-flutter-uploader) &nbsp; [![badge](https://img.shields.io/discourse/topics?server=https%3A%2F%2Fcommunity.api.video)](https://community.api.video)
 ![](https://github.com/apivideo/API_OAS_file/blob/master/apivideo_banner.png)
+<h1 align="center">api.video Flutter video uploader</h1>
 
-[api.video](https://api.video) is an API that encodes on the go to facilitate immediate playback, enhancing viewer streaming experiences across multiple devices and platforms. You can stream live or on-demand online videos within minutes.
+[api.video](https://api.video) is the video infrastructure for product builders. Lightning fast video APIs for integrating, scaling, and managing on-demand & low latency live streaming features in your app.
 
-# flutter-video-uploader
+# Table of contents
+
+- [Table of contents](#table-of-contents)
+- [Project description](#project-description)
+- [Getting started](#getting-started)
+  - [Installation](#installation)
+    - [Code sample](#code-sample)
+  - [Plugins](#plugins)
+- [FAQ](#faq)
+
+# Project description
 
 This flutter plugin is an easy way to upload video to api.video.
+
+# Getting started
 
 ## Installation
 Add this to your package's pubspec.yaml file, use the latest version
@@ -19,15 +27,7 @@ dependencies:
   apivideouploader: ^latest_version
 ```
 
-
-## Getting Started
-
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
-
-### Example
+### Code sample
 
 ```Dart
 var json = await ApiVideoUploader.uploadVideo("your_Token","imageName" , "imagePath");
@@ -42,18 +42,13 @@ this project is using external library
 | android-video-uploader | [https://github.com/apivideo/android-video-uploader][android-video-uploader] |
 
 
-### FAQ
+# FAQ
 If you have any questions, ask us here:  https://community.api.video .
 Or use [Issues].
-
-License
-----
-
-MIT License Copyright (c) 2021 api.video
 
 
 [//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
-[Issues]: <https://github.com/apivideo/flutter-video-uploader/issues>
+[Issues]: <https://github.com/apivideo/api.video-flutter-uploader/issues>
 [VideoUploaderIos]: <https://github.com/apivideo/VideoUploaderIos>
 [android-video-uploader]: <https://github.com/apivideo/android-video-uploader>
