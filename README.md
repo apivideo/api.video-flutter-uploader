@@ -16,7 +16,12 @@
 
 # Project description
 
-This flutter plugin is an easy way to upload video to api.video.
+api.video's Flutter uploader uploads videos to api.video using delegated upload token or API Key.
+
+It allows you to upload videos in two ways:
+
+- standard upload: to send a whole video file in one go
+- progressive upload: to send a video file by chunks, without needing to know the final size of the video file
 
 # Getting started
 
@@ -32,23 +37,17 @@ dependencies:
 ```Dart
 var json = await ApiVideoUploader.uploadVideo("your_Token","imageName" , "imagePath");
 ```
+
 ## Plugins
 
 this project is using external library
 
 | Plugin | README |
 | ------ | ------ |
-| VideoUploaderIos | [https://github.com/apivideo/VideoUploaderIos][VideoUploaderIos] |
-| android-video-uploader | [https://github.com/apivideo/android-video-uploader][android-video-uploader] |
-
+| iOS-video-uploader | [iOS-video-uploader](https://github.com/apivideo/api.video-ios-uploader) |
+| android-video-uploader | [android-video-uploader](https://github.com/apivideo/api.video-android-uploader) |
 
 # FAQ
+
 If you have any questions, ask us here:  https://community.api.video .
-Or use [Issues].
-
-
-[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
-
-[Issues]: <https://github.com/apivideo/api.video-flutter-uploader/issues>
-[VideoUploaderIos]: <https://github.com/apivideo/VideoUploaderIos>
-[android-video-uploader]: <https://github.com/apivideo/android-video-uploader>
+Or use [Issues](https://github.com/apivideo/api.video-flutter-uploader/issues).
