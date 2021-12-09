@@ -1,4 +1,4 @@
-group 'video.api.uploader.apivideouploader'
+group 'video.api.flutter.uploader'
 version '1.0-SNAPSHOT'
 
 buildscript {

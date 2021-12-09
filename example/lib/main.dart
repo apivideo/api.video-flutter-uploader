@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:apivideouploader/apivideouploader.dart';
+import 'package:apivideo_uploader/apivideo_uploader.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -14,7 +14,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var _imageName;
   var _imagePath;
   final _tokenTextController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
@@ -59,7 +58,6 @@ class _MyAppState extends State<MyApp> {
                 if (image != null) {
                   setState(() {
                     try {
-                      _imageName = image.name;
                       _imagePath = image.path;
                     } catch (e) {
                       log("Failed to get video: $e");

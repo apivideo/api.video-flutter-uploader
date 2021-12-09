@@ -1,4 +1,4 @@
-name: apivideouploader
+name: apivideo_uploader
 description: This flutter plugin is an easy way to upload video to api.video.
 version: 0.0.2
 homepage: https://github.com/apivideo/api.video-flutter-uploader
@@ -27,10 +27,10 @@ flutter:
   plugin:
     platforms:
       android:
-        package: video.api.uploader.apivideouploader
-        pluginClass: ApivideouploaderPlugin
+        package: video.api.flutter.uploader
+        pluginClass: UploaderPlugin
       ios:
-        pluginClass: ApivideouploaderPlugin
+        pluginClass: UploaderPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

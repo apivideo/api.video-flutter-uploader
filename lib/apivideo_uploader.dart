@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 class ApiVideoUploader {
-  static const MethodChannel _channel = const MethodChannel('apivideouploader');
+  static const MethodChannel _channel = const MethodChannel('video.api/uploader');
 
   static Future<Map<String, dynamic>?> uploadVideo(
       String token, String fileName, String filePath) async {

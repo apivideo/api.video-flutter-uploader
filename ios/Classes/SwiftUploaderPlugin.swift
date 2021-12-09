@@ -2,10 +2,10 @@ import Flutter
 import UIKit
 import VideoUploaderIos
 
-public class SwiftApivideouploaderPlugin: NSObject, FlutterPlugin {
+public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "apivideouploader", binaryMessenger: registrar.messenger())
-    let instance = SwiftApivideouploaderPlugin()
+    let channel = FlutterMethodChannel(name: "video.api/uploader", binaryMessenger: registrar.messenger())
+    let instance = SwiftUploaderPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
@@ -47,6 +47,5 @@ public class SwiftApivideouploaderPlugin: NSObject, FlutterPlugin {
           uploader.uploadWithDelegatedToken(delegatedToken: delegatedToken, fileName: fileName, filePath: filePath, url: url){ (json, error) in
               completion(json, error)
           }
-
   }
 }

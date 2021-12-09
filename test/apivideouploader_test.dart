@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:apivideouploader/apivideouploader.dart';
+import 'package:apivideo_uploader/apivideo_uploader.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel('apivideouploader');
+  const MethodChannel channel = MethodChannel('video.api/uploader');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 

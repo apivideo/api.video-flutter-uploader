@@ -10,9 +10,10 @@
 - [Project description](#project-description)
 - [Getting started](#getting-started)
   - [Installation](#installation)
-    - [Code sample](#code-sample)
-  - [Plugins](#plugins)
+  - [Code sample](#code-sample)
+- [Plugins](#plugins)
 - [FAQ](#faq)
+- [Found this video uploader useful?](#found-this-video-uploader-useful)
 
 # Project description
 
@@ -25,22 +26,32 @@ It allows you to upload videos in two ways:
 
 # Getting started
 
-## Installation
-Add this to your package's pubspec.yaml file, use the latest version
+### Installation
+
+Run this command:
+
+```bash
+flutter pub add apivideo_uploader
+ ```
+ 
+This will add the following lines to your package's pubspec.yaml file:
+
 ``` yaml
 dependencies:
-  apivideouploader: ^latest_version
+  apivideo_uploader: ^0.1.0
 ```
 
 ### Code sample
 
-```Dart
-var json = await ApiVideoUploader.uploadVideo("your_Token","imageName" , "imagePath");
+```dart
+import 'package:apivideo_uploader/apivideo_uploader.dart';
+
+var video = await ApiVideoUploader.uploadWithUploadToken("MY_VIDEO_TOKEN", "path/to/my-video.mp4");
 ```
 
-## Plugins
+# Dependencies
 
-this project is using external library
+This project is using external library
 
 | Plugin | README |
 | ------ | ------ |
@@ -49,5 +60,9 @@ this project is using external library
 
 # FAQ
 
-If you have any questions, ask us here:  https://community.api.video .
+If you have any questions, ask us here: [https://community.api.video](https://community.api.video).
 Or use [Issues](https://github.com/apivideo/api.video-flutter-uploader/issues).
+
+# Found this video uploader useful?
+
+Please star ⭐ the repo to help others find it.

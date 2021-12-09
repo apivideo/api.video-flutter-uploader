@@ -1,17 +1,17 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint apivideouploader.podspec` to validate before publishing.
+# Run `pod lib lint apivideo_uploader.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'apivideouploader'
+  s.name             = 'apivideo_uploader'
   s.version          = '0.0.2'
   s.summary          = 'A new flutter plugin project.'
   s.description      = <<-DESC
 A new flutter plugin project.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://docs.api.video'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { "Ecosystem Team" => "ecosystem@api.video" }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
