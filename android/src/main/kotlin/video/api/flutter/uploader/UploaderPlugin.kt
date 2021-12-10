@@ -1,20 +1,17 @@
 package video.api.flutter.uploader
 
-import androidx.annotation.NonNull
+import android.os.Handler
+import android.os.Looper
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import okhttp3.OkHttpClient
-import org.json.JSONObject
-import video.api.videouploader_module.ApiError
-import video.api.videouploader_module.CallBack
-import video.api.videouploader_module.UploaderRequestExecutorImpl
-import video.api.videouploader_module.VideoUploader
+import video.api.uploader.VideosApi
+import video.api.uploader.api.ApiException
+import video.api.uploader.api.JSON
 import java.io.File
-import java.io.IOException
-import java.net.URI
+import java.util.concurrent.Executors
 
 class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     /// The MethodChannel that will the communication between Flutter and native Android
@@ -22,60 +19,62 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
     /// when the Flutter Engine is detached from the Activity
     private lateinit var channel: MethodChannel
+    private val json = JSON()
+    private val executor = Executors.newSingleThreadExecutor()
 
-    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "video.api/uploader")
         channel.setMethodCallHandler(this)
     }
 
-    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
-            "uploadVideo" -> {
+            "uploadWithUploadToken" -> {
                 val token = call.argument<String>("token")
-                //val fileName = call.argument<String>("fileName")
                 val filePath = call.argument<String>("filePath")
-                if (token != null && filePath != null) {
-                    uploadVideo(token, filePath, object : CallBack {
-                        override fun onError(apiError: ApiError) {
-                            result.notImplemented()
-                        }
-
-                        override fun onFatal(e: IOException) {
-                            result.notImplemented()
-                        }
-
-                        override fun onSuccess(res: JSONObject) {
-                            result.success(res.toString())
-                        }
-                    })
+                when {
+                    token == null -> {
+                        result.error("IO", "token is required", null)
+                    }
+                    filePath == null -> {
+                        result.error("IO", "File path is required", null)
+                    }
+                    else -> {
+                        uploadWithUploadToken(token, filePath, result)
+                    }
                 }
+            }
+            else -> result.notImplemented()
+        }
+    }
+
+    private fun postSuccess(string: String, result: Result) {
+        Handler(Looper.getMainLooper()).post {
+            result.success(string)
+        }
+    }
+
+    private fun postException(e: ApiException, result: Result) {
+        Handler(Looper.getMainLooper()).post {
+            result.error(e.code.toString(), e.message, e.responseBody)
+        }
+    }
+
+    private fun uploadWithUploadToken(token: String, filePath: String, result: Result) {
+        val videoApi = VideosApi()
+        val file = File(filePath)
+
+        executor.execute {
+            try {
+                val video = videoApi.uploadWithUploadToken(token, file)
+                postSuccess(json.serialize(video), result)
+            } catch (e: ApiException) {
+                postException(e, result)
             }
         }
     }
 
-    private fun uploadVideo(token: String, filePath: String, callBack: CallBack) {
-        val client = OkHttpClient()
-        val uploader =
-            VideoUploader("https://ws.api.video", UploaderRequestExecutorImpl(client), client)
-        val uri = URI(filePath)
-        val file = File(uri.path)
-        var json: JSONObject? = null
-        uploader.uploadWithDelegatedToken(token, file, object : CallBack {
-            override fun onError(apiError: ApiError) {
-                callBack.onError(apiError)
-            }
-
-            override fun onFatal(e: IOException) {
-                callBack.onFatal(e)
-            }
-
-            override fun onSuccess(result: JSONObject) {
-                callBack.onSuccess(result!!)
-            }
-        })
-    }
-
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
     }
 }
