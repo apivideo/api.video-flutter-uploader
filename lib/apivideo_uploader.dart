@@ -2,20 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:apivideo_uploader/types/video.dart';
 
 class ApiVideoUploader {
   static const MethodChannel _channel =
       const MethodChannel('video.api/uploader');
 
-  static Future<Map<String, dynamic>?> uploadVideo(
+  static Future<Video> uploadVideo(
       String token, String filePath) async {
-    Map<String, dynamic>? json;
-    var video =
+    var videoJson =
         await _channel.invokeMethod('uploadWithUploadToken', <String, dynamic>{
       'token': token,
       'filePath': filePath,
     });
-    json = jsonDecode(video);
-    return json;
+    return Video.fromJson(jsonDecode(videoJson));
   }
 }

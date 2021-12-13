@@ -75,10 +75,10 @@ class _MyAppState extends State<MyApp> {
               ),
               onPressed: () async {
                 try {
-                  var json = await ApiVideoUploader.uploadVideo(
+                  var video = await ApiVideoUploader.uploadVideo(
                       _tokenTextController.text, _imagePath);
-                  log("JSON : $json");
-                  log("Title : ${json!["title"]}");
+                  log("Video : $video");
+                  log("Title : ${video.title}");
                 } catch (e) {
                   log("Failed to upload video: $e");
                 }
