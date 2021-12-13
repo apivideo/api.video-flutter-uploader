@@ -75,7 +75,7 @@ class _MyAppState extends State<MyApp> {
               ),
               onPressed: () async {
                 try {
-                  var video = await ApiVideoUploader.uploadVideo(
+                  var video = await ApiVideoUploader.uploadWithUploadToken(
                       _tokenTextController.text, _imagePath);
                   log("Video : $video");
                   log("Title : ${video.title}");

@@ -21,6 +21,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
     private val json = JSON()
     private val executor = Executors.newSingleThreadExecutor()
+    private var videoApi = VideosApi()
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "video.api/uploader")
@@ -44,6 +45,34 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                     }
                 }
             }
+            "upload" -> {
+                val videoId = call.argument<String>("videoId")
+                val filePath = call.argument<String>("filePath")
+                when {
+                    videoId == null -> {
+                        result.error("IO", "videoId is required", null)
+                    }
+                    filePath == null -> {
+                        result.error("IO", "File path is required", null)
+                    }
+                    else -> {
+                        upload(videoId, filePath, result)
+                    }
+                }
+            }
+            "setApiKey" -> {
+                val apiKey = call.argument<String>("apiKey")
+                videoApi = if (apiKey != null) {
+                    VideosApi(apiKey, videoApi.apiClient.basePath)
+                } else {
+                    VideosApi(videoApi.apiClient.basePath)
+                }
+            }
+            "setEnvironment" -> {
+                call.argument<String>("environment")?.let {
+                    videoApi.apiClient.basePath = it
+                } ?: result.error("IO", "Environment is required", null)
+            }
             else -> result.notImplemented()
         }
     }
@@ -61,12 +90,24 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun uploadWithUploadToken(token: String, filePath: String, result: Result) {
-        val videoApi = VideosApi()
         val file = File(filePath)
 
         executor.execute {
             try {
                 val video = videoApi.uploadWithUploadToken(token, file)
+                postSuccess(json.serialize(video), result)
+            } catch (e: ApiException) {
+                postException(e, result)
+            }
+        }
+    }
+
+    private fun upload(videoId: String, filePath: String, result: Result) {
+        val file = File(filePath)
+
+        executor.execute {
+            try {
+                val video = videoApi.upload(videoId, file)
                 postSuccess(json.serialize(video), result)
             } catch (e: ApiException) {
                 postException(e, result)
