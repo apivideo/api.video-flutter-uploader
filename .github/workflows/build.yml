@@ -1,23 +1,26 @@
-name: Run tests
+name: Build
 on: [push]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup Flutter
-        id: flutter
-        uses: DanTup/gh-actions/setup-flutter@master
-        with:
-          channel: 2.5.3
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Analyze project source
-        run: flutter analyze
-      - name: Run tests
-        run: flutter test
 
-  publish_test:
+defaults:
+  run:
+    working-directory: example/
+
+jobs:
+  build_ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Flutter
+        id: flutter
+        uses: DanTup/gh-actions/setup-flutter@master
+        with:
+          channel: 2.5.3
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build iOS application
+        run: flutter build ios --no-codesign
+
+  build_android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -28,5 +31,5 @@ jobs:
           channel: 2.5.3
       - name: Install dependencies
         run: flutter pub get
-      - name: Dry-run publishing
-        run: flutter pub publish --dry-run
+      - name: Build Android application
+        run: flutter build apk
