@@ -10,8 +10,8 @@ class ApiVideoUploader {
       const MethodChannel('video.api/uploader');
 
   static void setEnvironment(Environment environment) {
-    _channel.invokeMethod('setEnvironment',
-        <String, dynamic>{'environment': environment.name});
+    _channel.invokeMethod(
+        'setEnvironment', <String, dynamic>{'environment': environment.name});
   }
 
   static void setApiKey(String apiKey) {
@@ -28,21 +28,19 @@ class ApiVideoUploader {
     return Video.fromJson(jsonDecode(videoJson));
   }
 
-  static Future<Video> upload(
-      String videoId, String filePath) async {
-    var videoJson =
-    await _channel.invokeMethod('upload', <String, dynamic>{
-      'videoId': videoId,
-      'filePath': filePath
-    });
+  static Future<Video> upload(String videoId, String filePath) async {
+    var videoJson = await _channel.invokeMethod(
+        'upload', <String, dynamic>{'videoId': videoId, 'filePath': filePath});
     return Video.fromJson(jsonDecode(videoJson));
   }
 
-  static ProgressiveUploadSession createProgressiveUploadSession(String videoId) {
+  static ProgressiveUploadSession createProgressiveUploadSession(
+      String videoId) {
     return ProgressiveUploadSession(_channel, videoId);
   }
 
-  static ProgressiveUploadWithUploadTokenSession createProgressiveUploadWithUploadTokenSession(String token) {
+  static ProgressiveUploadWithUploadTokenSession
+      createProgressiveUploadWithUploadTokenSession(String token) {
     return ProgressiveUploadWithUploadTokenSession(_channel, token);
   }
 }
@@ -52,56 +50,41 @@ class ProgressiveUploadWithUploadTokenSession {
   final MethodChannel _channel;
 
   ProgressiveUploadWithUploadTokenSession(this._channel, this.token) {
-    _channel.invokeMethod('createUploadWithUploadTokenSession', <String, dynamic>{
-      'token': token
-    });
+    _channel.invokeMethod('createUploadWithUploadTokenSession',
+        <String, dynamic>{'token': token});
   }
 
   Future<Video> uploadPart(String filePath) async {
-    var videoJson =
-    await _channel.invokeMethod('uploadPart', <String, dynamic>{
-      'token': token,
-      'filePath': filePath
-    });
+    var videoJson = await _channel.invokeMethod(
+        'uploadPart', <String, dynamic>{'token': token, 'filePath': filePath});
     return Video.fromJson(jsonDecode(videoJson));
   }
 
   Future<Video> uploadLastPart(String filePath) async {
-    var videoJson =
-    await _channel.invokeMethod('uploadLastPart', <String, dynamic>{
-      'token': token,
-      'filePath': filePath
-    });
+    var videoJson = await _channel.invokeMethod('uploadLastPart',
+        <String, dynamic>{'token': token, 'filePath': filePath});
     return Video.fromJson(jsonDecode(videoJson));
   }
 }
-
 
 class ProgressiveUploadSession {
   final String videoId;
   final MethodChannel _channel;
 
   ProgressiveUploadSession(this._channel, this.videoId) {
-    _channel.invokeMethod('createUploadSession', <String, dynamic>{
-      'videoId': videoId
-    });
+    _channel.invokeMethod(
+        'createUploadSession', <String, dynamic>{'videoId': videoId});
   }
 
   Future<Video> uploadPart(String filePath) async {
-    var videoJson =
-    await _channel.invokeMethod('uploadPart', <String, dynamic>{
-      'videoId': videoId,
-      'filePath': filePath
-    });
+    var videoJson = await _channel.invokeMethod('uploadPart',
+        <String, dynamic>{'videoId': videoId, 'filePath': filePath});
     return Video.fromJson(jsonDecode(videoJson));
   }
 
   Future<Video> uploadLastPart(String filePath) async {
-    var videoJson =
-    await _channel.invokeMethod('uploadLastPart', <String, dynamic>{
-      'videoId': videoId,
-      'filePath': filePath
-    });
+    var videoJson = await _channel.invokeMethod('uploadLastPart',
+        <String, dynamic>{'videoId': videoId, 'filePath': filePath});
     return Video.fromJson(jsonDecode(videoJson));
   }
 }

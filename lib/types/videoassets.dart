@@ -12,7 +12,8 @@ class VideoAssets {
 
   VideoAssets({this.hls, this.iframe, this.player, this.thumbnail, this.mp4});
 
-  factory VideoAssets.fromJson(Map<String, dynamic> json) => _$VideoAssetsFromJson(json);
+  factory VideoAssets.fromJson(Map<String, dynamic> json) =>
+      _$VideoAssetsFromJson(json);
 
   Map<String, dynamic> toJson() => _$VideoAssetsToJson(this);
 }

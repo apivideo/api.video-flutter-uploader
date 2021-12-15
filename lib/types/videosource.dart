@@ -11,7 +11,8 @@ class VideoSource {
 
   VideoSource({this.uri, this.type, this.liveStream});
 
-  factory VideoSource.fromJson(Map<String, dynamic> json) => _$VideoSourceFromJson(json);
+  factory VideoSource.fromJson(Map<String, dynamic> json) =>
+      _$VideoSourceFromJson(json);
 
   Map<String, dynamic> toJson() => _$VideoSourceToJson(this);
 }

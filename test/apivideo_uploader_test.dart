@@ -54,7 +54,9 @@ void main() {
       expect(methodCall.arguments["filePath"], filePath);
       return jsonEncode(Video(videoId: videoId).toJson());
     });
-    expect((await ApiVideoUploader.uploadWithUploadToken(token, filePath)).videoId, videoId);
+    expect(
+        (await ApiVideoUploader.uploadWithUploadToken(token, filePath)).videoId,
+        videoId);
     channel.setMockMethodCallHandler(null);
   });
 
@@ -92,7 +94,6 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-
   test('progressiveUploadWithUploadTokenSession', () async {
     final videoId = "abcde";
     final token = "abcde";
@@ -104,7 +105,8 @@ void main() {
       expect(methodCall.arguments["token"], token);
       return;
     });
-    final session = ApiVideoUploader.createProgressiveUploadWithUploadTokenSession(token);
+    final session =
+        ApiVideoUploader.createProgressiveUploadWithUploadTokenSession(token);
     channel.setMockMethodCallHandler(null);
 
     // Upload part
