@@ -1,7 +1,16 @@
-enum Environment { sandbox, production }
+/// An enumeration of api.video endpoint.
+enum Environment {
+  /// The sandbox environment (for test).
+  sandbox,
 
+  /// The production environment.
+  production
+}
+
+/// Extension for [Environment].
 extension EnvironmentExtension on Environment {
-  String get name {
+  /// The api.video environment url [basePath].
+  String get basePath {
     switch (this) {
       case Environment.sandbox:
         return 'https://sandbox.api.video';

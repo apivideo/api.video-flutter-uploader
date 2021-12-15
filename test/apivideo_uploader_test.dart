@@ -7,13 +7,15 @@ import 'package:apivideo_uploader/apivideo_uploader.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  /// The mocked method channel
   const MethodChannel channel = const MethodChannel('video.api/uploader');
 
   test('setApiKey', () async {
     final environment = Environment.sandbox;
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       expect(methodCall.method, "setEnvironment");
-      expect(methodCall.arguments["environment"], environment.name);
+      expect(methodCall.arguments["environment"], environment.basePath);
       return;
     });
     ApiVideoUploader.setEnvironment(environment);
