@@ -52,9 +52,8 @@ class Video {
   final bool? mp4Support;
 
   /// Creates a [Video].
-  Video(
-      {required this.videoId,
-      this.createdAt,
+  Video(this.videoId,
+      {this.createdAt,
       this.title,
       this.description,
       this.publishedAt,
