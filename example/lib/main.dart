@@ -1,8 +1,10 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_uploader/video_uploader.dart';
 
 const primaryColor = Color(0xFFFA5B30);
@@ -41,7 +43,6 @@ class UploaderPage extends StatefulWidget {
 
 class UploaderPageState extends State<UploaderPage> {
   final _tokenTextController = TextEditingController();
-  final ImagePicker _picker = ImagePicker();
   double _progressValue = 0;
   bool _hasUploadStarted = false;
 
@@ -81,39 +82,61 @@ class UploaderPageState extends State<UploaderPage> {
               controller: _tokenTextController,
             ),
             MaterialButton(
-              color: primaryColor,
-              child: const Text(
-                "Pick Video",
-                style: TextStyle(
-                    color: Colors.white70, fontWeight: FontWeight.bold),
-              ),
-              onPressed: () async {
-                var source = ImageSource.gallery;
-                XFile? image = await _picker.pickVideo(source: source);
-                if (image != null) {
+                color: primaryColor,
+                child: const Text(
+                  "Upload",
+                  style: TextStyle(
+                      color: Colors.white70, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () async {
                   setState(() {
                     _hasUploadStarted = true;
                   });
                   try {
-                    var video = await ApiVideoUploader.uploadWithUploadToken(
-                        _tokenTextController.text, image.path,
-                        onProgress: (progress) {
-                      log("Progress :$progress");
-                      setProgress(progress);
+                    var session =
+                        ApiVideoUploader.createProgressiveUploadSession(
+                            _tokenTextController.text);
+
+                    var path = await copyAsset("10m.mp4.part.a");
+                    var video =
+                        await session.uploadPart(path, onProgress: (progress) {
+                      log("Part1: Progress : $progress");
+                      setProgress(progress.toDouble() / 100);
                     });
+
+                    log("Video : $video");
+                    log("Title : ${video.title}");
+
+                    path = await copyAsset("10m.mp4.part.b");
+                    video =
+                        await session.uploadPart(path, onProgress: (progress) {
+                      log("Part2: Progress : $progress");
+                      setProgress(progress.toDouble() / 100);
+                    });
+
+                    log("Video : $video");
+                    log("Title : ${video.title}");
+
+                    path = await copyAsset("10m.mp4.part.c");
+                    video = await session.uploadLastPart(path,
+                        onProgress: (progress) {
+                      log("Part3: Progress : $progress");
+                      setProgress(progress.toDouble() / 100);
+                    });
+
+                    log("Video : $video");
+                    log("Title : ${video.title}");
                     log("VideoId : ${video.videoId}");
                     log("Title : ${video.title}");
-                    showSuccessSnackBar("Video ${video.videoId} uploaded");
+                    showSuccessSnackBar(context, "Video ${video.videoId} uploaded");
                   } on Exception catch (e) {
                     log("Failed to upload video: $e");
-                    showErrorSnackBar("Failed to upload video: ${(e).message}");
+                    showErrorSnackBar(context, "Failed to upload video: ${(e).message}");
                   } catch (e) {
                     log("Failed to upload video: $e");
-                    showErrorSnackBar("Failed to upload video");
+                    showErrorSnackBar(context, "Failed to upload video");
                   }
-                }
-              },
-            ),
+                }),
             _hasUploadStarted
                 ? LinearProgressIndicator(
                     color: primaryColor,
@@ -144,18 +167,18 @@ class UploaderPageState extends State<UploaderPage> {
     );
   }
 
-  void showSuccessSnackBar(String message) {
-    showSnackBar(message, backgroundColor: Colors.green);
+  void showSuccessSnackBar(BuildContext context, String message) {
+    showSnackBar(context, message, backgroundColor: Colors.green);
   }
 
-  void showErrorSnackBar(String message) {
-    showSnackBar(message,
+  void showErrorSnackBar(BuildContext context, String message) {
+    showSnackBar(context, message,
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 60),
         showCloseIcon: true);
   }
 
-  void showSnackBar(String message,
+  void showSnackBar(BuildContext context, String message,
       {Color? backgroundColor,
       Duration duration = const Duration(seconds: 4),
       bool showCloseIcon = false}) {
@@ -177,4 +200,16 @@ extension ErrorExtension on Exception {
     }
     return toString();
   }
+}
+
+Future<String> copyAsset(String name) async {
+  ByteData data = await rootBundle.load("assets/$name");
+  List<int> bytes =
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+
+  Directory appDocDir = await getApplicationDocumentsDirectory();
+  String path = join(appDocDir.path, name);
+  await File(path).writeAsBytes(bytes);
+
+  return path;
 }
