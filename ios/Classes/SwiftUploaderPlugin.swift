@@ -5,11 +5,12 @@ import ApiVideoUploader
 
 public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
     var progressiveUploadSessions: [String: ProgressiveUploadSessioning] = [:]
-
+    static var channel: FlutterMethodChannel? = nil
+    
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "video.api/uploader", binaryMessenger: registrar.messenger())
+        channel = FlutterMethodChannel(name: "video.api/uploader", binaryMessenger: registrar.messenger())
         let instance = SwiftUploaderPlugin()
-        registrar.addMethodCallDelegate(instance, channel: channel)
+        registrar.addMethodCallDelegate(instance, channel: channel!)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -17,25 +18,26 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
         case "setApiKey":
             if let args = call.arguments as? Dictionary<String, Any>,
                let apiKey = args["apiKey"] as? String {
-                  ApiVideoUploader.apiKey = apiKey
-               } else {
-                  result(FlutterError.init(code: "IO", message: "apiKey is required", details: nil))
-               }
+                ApiVideoUploader.apiKey = apiKey
+            } else {
+                result(FlutterError.init(code: "IO", message: "apiKey is required", details: nil))
+            }
             break
         case "setEnvironment":
-             if let args = call.arguments as? Dictionary<String, Any>,
-                let environment = args["environment"] as? String {
-                   ApiVideoUploader.basePath = environment
-                } else {
-                   result(FlutterError.init(code: "IO", message: "environment is required", details: nil))
-                }
+            if let args = call.arguments as? Dictionary<String, Any>,
+               let environment = args["environment"] as? String {
+                ApiVideoUploader.basePath = environment
+            } else {
+                result(FlutterError.init(code: "IO", message: "environment is required", details: nil))
+            }
             break
         case "uploadWithUploadToken":
             if let args = call.arguments as? Dictionary<String, Any>,
                let token = args["token"] as? String,
-               let filePath = args["filePath"] as? String
+               let filePath = args["filePath"] as? String,
+               let operationId = args["operationId"] as? String
             {
-                uploadWithUploadToken(token: token, filePath: filePath, result: result)
+                uploadWithUploadToken(token: token, filePath: filePath, operationId: operationId, result: result)
             } else {
                 result(FlutterError.init(code: "IO", message: "token and file path are required", details: nil))
             }
@@ -43,32 +45,34 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
         case "upload":
             if let args = call.arguments as? Dictionary<String, Any>,
                let videoId = args["videoId"] as? String,
-               let filePath = args["filePath"] as? String
+               let filePath = args["filePath"] as? String,
+               let operationId = args["operationId"] as? String
             {
-                upload(videoId: videoId, filePath: filePath, result: result)
+                upload(videoId: videoId, filePath: filePath, operationId: operationId, result: result)
             } else {
                 result(FlutterError.init(code: "IO", message: "token and file path are required", details: nil))
             }
             break
         case "createUploadSession":
-             if let args = call.arguments as? Dictionary<String, Any>,
-                let videoId = args["videoId"] as? String {
-                 progressiveUploadSessions[videoId] = VideosAPI.buildProgressiveUploadSession(videoId: videoId)
-                } else {
-                   result(FlutterError.init(code: "IO", message: "videoId is required", details: nil))
-                }
+            if let args = call.arguments as? Dictionary<String, Any>,
+               let videoId = args["videoId"] as? String {
+                progressiveUploadSessions[videoId] = VideosAPI.buildProgressiveUploadSession(videoId: videoId)
+            } else {
+                result(FlutterError.init(code: "IO", message: "videoId is required", details: nil))
+            }
             break
         case "createUploadWithUploadTokenSession":
-             if let args = call.arguments as? Dictionary<String, Any>,
-                let token = args["token"] as? String {
-                 progressiveUploadSessions[token] = VideosAPI.buildProgressiveUploadWithUploadTokenSession(token: token)
-                } else {
-                   result(FlutterError.init(code: "IO", message: "token is required", details: nil))
-                }
+            if let args = call.arguments as? Dictionary<String, Any>,
+               let token = args["token"] as? String {
+                progressiveUploadSessions[token] = VideosAPI.buildProgressiveUploadWithUploadTokenSession(token: token)
+            } else {
+                result(FlutterError.init(code: "IO", message: "token is required", details: nil))
+            }
             break
         case "uploadPart":
             if let args = call.arguments as? Dictionary<String, Any>,
-               let filePath = args["filePath"] as? String
+               let filePath = args["filePath"] as? String,
+               let operationId = args["operationId"] as? String
             {
                 let videoId = args["videoId"] as? String
                 let token = args["token"] as? String
@@ -78,19 +82,20 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                     result(FlutterError.init(code: "IO", message: "Only one of videoId or token is required", details: nil))
                 } else {
                     if let session = progressiveUploadSessions[videoId ?? token!] {
-                        uploadPart(session: session, filePath: filePath, result: result)
+                        uploadPart(session: session, filePath: filePath, operationId: operationId, result: result)
                     } else {
                         result(FlutterError.init(code: "IO", message: "Unknown upload session", details: nil))
                     }
                 }
-              
+                
             } else {
                 result(FlutterError.init(code: "IO", message: "File path is required", details: nil))
             }
             break
         case "uploadLastPart":
             if let args = call.arguments as? Dictionary<String, Any>,
-               let filePath = args["filePath"] as? String
+               let filePath = args["filePath"] as? String,
+               let operationId = args["operationId"] as? String
             {
                 let videoId = args["videoId"] as? String
                 let token = args["token"] as? String
@@ -100,12 +105,12 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                     result(FlutterError.init(code: "IO", message: "Only one of videoId or token is required", details: nil))
                 } else {
                     if let session = progressiveUploadSessions[videoId ?? token!] {
-                        uploadLastPart(session: session, filePath: filePath, result: result)
+                        uploadLastPart(session: session, filePath: filePath, operationId: operationId, result: result)
                     } else {
                         result(FlutterError.init(code: "IO", message: "Unknown upload session", details: nil))
                     }
                 }
-              
+                
             } else {
                 result(FlutterError.init(code: "IO", message: "File path is required", details: nil))
             }
@@ -137,34 +142,46 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             result(FlutterError.init(code: String(code), message: message, details: nil))
             return
         }
-
+        
         result(FlutterError.init(code: "Unknown error", message: nil, details: nil))
     }
     
-    private func uploadWithUploadToken(token: String, filePath: String, result: @escaping FlutterResult) {
+    private func manageProgress(operationId: String, progress: Progress) {
+        SwiftUploaderPlugin.channel?.invokeMethod("onProgress", arguments: ["operationId": operationId, "bytesSent": progress.completedUnitCount, "totalBytes": progress.totalUnitCount])
+    }
+    
+    private func uploadWithUploadToken(token: String, filePath: String, operationId: String, result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
-        VideosAPI.uploadWithUploadToken(token: token, file: url) { (video, error) in
+        VideosAPI.uploadWithUploadToken(token: token, file: url, onProgressReady: { progress in
+            self.manageProgress(operationId: operationId, progress: progress)
+        }) { (video, error) in
             self.manageResult(video: video, optionalError: error, result: result)
         }
     }
     
-    private func upload(videoId: String, filePath: String, result: @escaping FlutterResult) {
+    private func upload(videoId: String, filePath: String, operationId: String, result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
-        VideosAPI.upload(videoId: videoId, file: url) { (video, error) in
+        VideosAPI.upload(videoId: videoId, file: url, onProgressReady: { progress in
+            self.manageProgress(operationId: operationId, progress: progress)
+        }) { (video, error) in
             self.manageResult(video: video, optionalError: error, result: result)
         }
     }
     
-    private func uploadPart(session: ProgressiveUploadSessioning, filePath: String, result: @escaping FlutterResult) {
+    private func uploadPart(session: ProgressiveUploadSessioning, filePath: String, operationId: String, result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
-        session.uploadPart(file: url, onProgressReady: nil, apiResponseQueue: ApiVideoUploader.apiResponseQueue) { (video, error) in
+        session.uploadPart(file: url, onProgressReady:  { progress in
+            self.manageProgress(operationId: operationId, progress: progress)
+        }, apiResponseQueue: ApiVideoUploader.apiResponseQueue) { (video, error) in
             self.manageResult(video: video, optionalError: error, result: result)
         }
     }
     
-    private func uploadLastPart(session: ProgressiveUploadSessioning, filePath: String, result: @escaping FlutterResult) {
+    private func uploadLastPart(session: ProgressiveUploadSessioning, filePath: String, operationId: String, result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
-        session.uploadLastPart(file: url, onProgressReady: nil, apiResponseQueue: ApiVideoUploader.apiResponseQueue) { (video, error) in
+        session.uploadLastPart(file: url, onProgressReady:  { progress in
+            self.manageProgress(operationId: operationId, progress: progress)
+        }, apiResponseQueue: ApiVideoUploader.apiResponseQueue) { (video, error) in
             self.manageResult(video: video, optionalError: error, result: result)
         }
     }

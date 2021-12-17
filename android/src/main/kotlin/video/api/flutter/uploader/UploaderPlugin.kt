@@ -49,6 +49,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
             "uploadWithUploadToken" -> {
                 val token = call.argument<String>("token")
                 val filePath = call.argument<String>("filePath")
+                val operationId = call.argument<String>("operationId")
                 when {
                     token == null -> {
                         result.error("IO", "token is required", null)
@@ -56,14 +57,18 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                     filePath == null -> {
                         result.error("IO", "File path is required", null)
                     }
+                    operationId == null -> {
+                        result.error("IO", "Operation id is required", null)
+                    }
                     else -> {
-                        uploadWithUploadToken(token, filePath, result)
+                        uploadWithUploadToken(token, filePath, operationId, result)
                     }
                 }
             }
             "upload" -> {
                 val videoId = call.argument<String>("videoId")
                 val filePath = call.argument<String>("filePath")
+                val operationId = call.argument<String>("operationId")
                 when {
                     videoId == null -> {
                         result.error("IO", "videoId is required", null)
@@ -71,8 +76,11 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                     filePath == null -> {
                         result.error("IO", "File path is required", null)
                     }
+                    operationId == null -> {
+                        result.error("IO", "Operation id is required", null)
+                    }
                     else -> {
-                        upload(videoId, filePath, result)
+                        upload(videoId, filePath, operationId, result)
                     }
                 }
             }
@@ -83,13 +91,15 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
             }
             "createUploadWithUploadTokenSession" -> {
                 call.argument<String>("token")?.let {
-                    progressiveUploadSessions[it] = videoApi.createUploadWithUploadTokenProgressiveSession(it)
+                    progressiveUploadSessions[it] =
+                        videoApi.createUploadWithUploadTokenProgressiveSession(it)
                 } ?: result.error("IO", "token is required", null)
             }
             "uploadPart" -> {
                 val videoId = call.argument<String>("videoId")
                 val token = call.argument<String>("token")
                 val filePath = call.argument<String>("filePath")
+                val operationId = call.argument<String>("operationId")
                 when {
                     (videoId == null) && (token == null) -> {
                         result.error("IO", "videoId or token is required", null)
@@ -100,8 +110,19 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                     filePath == null -> {
                         result.error("IO", "File path is required", null)
                     }
+                    operationId == null -> {
+                        result.error("IO", "Operation id is required", null)
+                    }
                     else -> {
-                        progressiveUploadSessions[videoId ?: token]?.let { uploadPart(it, filePath, result) }
+                        progressiveUploadSessions[videoId ?: token]?.let {
+                            uploadPart(
+                                videoId ?: token!!,
+                                it,
+                                filePath,
+                                operationId,
+                                result
+                            )
+                        }
                             ?: result.error("IO", "Unknown upload session", null)
                     }
                 }
@@ -110,6 +131,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                 val videoId = call.argument<String>("videoId")
                 val token = call.argument<String>("token")
                 val filePath = call.argument<String>("filePath")
+                val operationId = call.argument<String>("operationId")
                 when {
                     (videoId == null) && (token == null) -> {
                         result.error("IO", "videoId or token is required", null)
@@ -120,14 +142,34 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                     filePath == null -> {
                         result.error("IO", "File path is required", null)
                     }
+                    operationId == null -> {
+                        result.error("IO", "Operation id is required", null)
+                    }
                     else -> {
-                        progressiveUploadSessions[videoId ?: token]?.let { uploadLastPart(it, filePath, result) }
+                        progressiveUploadSessions[videoId ?: token]?.let {
+                            uploadLastPart(
+                                videoId ?: token!!,
+                                it,
+                                filePath,
+                                operationId,
+                                result
+                            )
+                        }
                             ?: result.error("IO", "Unknown upload session", null)
                         progressiveUploadSessions.remove(videoId)
                     }
                 }
             }
             else -> result.notImplemented()
+        }
+    }
+
+    private fun postOnProgress(operationId: String, bytesSent: Long, totalBytes: Long) {
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(
+                "onProgress",
+                mapOf("operationId" to operationId, "bytesSent" to bytesSent, "totalBytes" to totalBytes)
+            )
         }
     }
 
@@ -143,12 +185,15 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    private fun uploadWithUploadToken(token: String, filePath: String, result: Result) {
+    private fun uploadWithUploadToken(token: String, filePath: String, operationId: String, result: Result) {
         val file = File(filePath)
 
         executor.execute {
             try {
-                val video = videoApi.uploadWithUploadToken(token, file)
+                val video =
+                    videoApi.uploadWithUploadToken(token, file) { bytesSent, totalBytes, _, _ ->
+                        postOnProgress(operationId, bytesSent, totalBytes)
+                    }
                 postSuccess(json.serialize(video), result)
             } catch (e: ApiException) {
                 postException(e, result)
@@ -156,12 +201,14 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    private fun upload(videoId: String, filePath: String, result: Result) {
+    private fun upload(videoId: String, filePath: String, operationId: String, result: Result) {
         val file = File(filePath)
 
         executor.execute {
             try {
-                val video = videoApi.upload(videoId, file)
+                val video = videoApi.upload(videoId, file) { bytesSent, totalBytes, _, _ ->
+                    postOnProgress(operationId, bytesSent, totalBytes)
+                }
                 postSuccess(json.serialize(video), result)
             } catch (e: ApiException) {
                 postException(e, result)
@@ -170,15 +217,19 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun uploadPart(
+        id: String,
         session: IProgressiveUploadSession,
         filePath: String,
+        operationId: String,
         result: Result
     ) {
         val file = File(filePath)
 
         executor.execute {
             try {
-                val video = session.uploadPart(file)
+                val video = session.uploadPart(file) { bytesSent, totalBytes ->
+                    postOnProgress(operationId, bytesSent, totalBytes)
+                }
                 postSuccess(json.serialize(video), result)
             } catch (e: ApiException) {
                 postException(e, result)
@@ -187,15 +238,19 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun uploadLastPart(
+        id: String,
         session: IProgressiveUploadSession,
         filePath: String,
+        operationId: String,
         result: Result
     ) {
         val file = File(filePath)
 
         executor.execute {
             try {
-                val video = session.uploadLastPart(file)
+                val video = session.uploadLastPart(file) { bytesSent, totalBytes ->
+                    postOnProgress(operationId, bytesSent, totalBytes)
+                }
                 postSuccess(json.serialize(video), result)
             } catch (e: ApiException) {
                 postException(e, result)
