@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:apivideo_uploader/types/environment.dart';
-import 'package:apivideo_uploader/types/video.dart';
+import 'package:apivideo_uploader/src/types/environment.dart';
+import 'package:apivideo_uploader/src/types/video.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:apivideo_uploader/apivideo_uploader.dart';

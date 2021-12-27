@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:apivideo_uploader/types/video.dart';
-import 'package:apivideo_uploader/types/environment.dart';
 import 'package:flutter/widgets.dart';
+
+import 'src/types/environment.dart';
+import 'src/types/video.dart';
+
+export 'src/types.dart';
 
 /// Progress indicator callback
 typedef void OnProgress(int bytesSent, int totalBytes);

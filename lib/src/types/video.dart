@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:apivideo_uploader/types/videoassets.dart';
-import 'package:apivideo_uploader/types/videosource.dart';
-import 'package:apivideo_uploader/types/metadata.dart';
+import 'videoassets.dart';
+import 'videosource.dart';
+import 'metadata.dart';
 
 part 'video.g.dart';
 

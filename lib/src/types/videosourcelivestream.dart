@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:apivideo_uploader/types/videosourcelivestreamlink.dart';
+import 'videosourcelivestreamlink.dart';
 
 part 'videosourcelivestream.g.dart';
 
