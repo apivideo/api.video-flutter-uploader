@@ -1,9 +1,11 @@
 import 'dart:developer';
 
-import 'package:apivideouploader/apivideouploader.dart';
+import 'package:apivideo_uploader/apivideo_uploader.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+
+const primaryColor = Color(0xFFFA5B30);
+const secondaryColor = Color(0xFFFFB39E);
 
 void main() {
   runApp(MyApp());
@@ -15,88 +17,108 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var _imageFile;
-  var _imageName;
   var _imagePath;
-  var imagePicker;
-  var type;
+  final _tokenTextController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  double _progressValue = 0;
+
+  void setProgress(double value) async {
+    this.setState(() {
+      this._progressValue = value;
+    });
+  }
+
+  @override
+  void dispose() {
+    _tokenTextController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
+        theme: ThemeData(
+          primaryColor: primaryColor,
         ),
-        body: Center(
-            child: Column(
-          children: [
-            SizedBox(
-              height: 52,
-            ),
-            Center(
-              child: GestureDetector(
-                onTap: () async {},
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(color: Colors.red[200]),
-                  child: _imageFile != null
-                      ? Image.file(
-                          _imageFile,
-                          width: 200.0,
-                          height: 200.0,
-                          fit: BoxFit.fitHeight,
-                        )
-                      : Container(
-                          decoration: BoxDecoration(color: Colors.red[200]),
-                          width: 200,
-                          height: 200,
-                          child: Icon(
-                            Icons.camera_alt,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                ),
+        home: Scaffold(
+          appBar: AppBar(
+            backgroundColor: primaryColor,
+            title: const Text('Uploader Example'),
+          ),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 52,
+                  ),
+                  TextField(
+                    cursorColor: primaryColor,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Colors.white, width: 2.0)),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: primaryColor, width: 2.0)),
+                      hintText: 'My video token',
+                    ),
+                    controller: _tokenTextController,
+                  ),
+                  MaterialButton(
+                    color: primaryColor,
+                    child: Text(
+                      "Pick Video from Gallery",
+                      style: TextStyle(
+                          color: Colors.white70, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () async {
+                      var source = ImageSource.gallery;
+                      XFile? image = await _picker.pickVideo(source: source);
+                      if (image != null) {
+                        setState(() {
+                          try {
+                            _imagePath = image.path;
+                          } catch (e) {
+                            log("Failed to get video: $e");
+                          }
+                        });
+                      }
+                    },
+                  ),
+                  MaterialButton(
+                    color: primaryColor,
+                    child: Text(
+                      "Upload video",
+                      style: TextStyle(
+                          color: Colors.white70, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () async {
+                      try {
+                        var video =
+                            await ApiVideoUploader.uploadWithUploadToken(
+                                _tokenTextController.text, _imagePath,
+                                (bytesSent, totalByte) {
+                          log("Progress : ${bytesSent / totalByte}");
+                          this.setProgress(bytesSent / totalByte);
+                        });
+                        log("Video : $video");
+                        log("Title : ${video.title}");
+                      } catch (e) {
+                        log("Failed to upload video: $e");
+                      }
+                    },
+                  ),
+                  LinearProgressIndicator(
+                    color: primaryColor,
+                    backgroundColor: secondaryColor,
+                    value: _progressValue,
+                  ),
+                ],
               ),
             ),
-            MaterialButton(
-              color: Colors.blue,
-              child: Text(
-                "Pick Image from Gallery",
-                style: TextStyle(
-                    color: Colors.white70, fontWeight: FontWeight.bold),
-              ),
-              onPressed: () async {
-                var source = ImageSource.gallery;
-                XFile? image = await _picker.pickVideo(source: source);
-                setState(() {
-                  try {
-                    _imageName = image!.name;
-                    _imagePath = image!.path;
-                    _imageFile = File(image!.path);
-                  } catch (e) {}
-                });
-              },
-            ),
-            MaterialButton(
-              color: Colors.blue,
-              child: Text(
-                "Upload video",
-                style: TextStyle(
-                    color: Colors.white70, fontWeight: FontWeight.bold),
-              ),
-              onPressed: () async {
-                var json = await ApiVideoUploader.uploadVideo(
-                    "YOUR_TOKEN", _imageName, _imagePath);
-                log("JSON : $json");
-                log("Title : ${json!["title"]}");
-              },
-            ),
-          ],
-        )),
-      ),
-    );
+          ),
+        ));
   }
 }

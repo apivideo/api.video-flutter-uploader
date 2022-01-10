@@ -1,6 +1,6 @@
-# apivideouploader_example
+# Uploader Example
 
-Demonstrates how to use the apivideouploader plugin.
+Demonstrates how to use the flutter api.video uploader.
 
 ## Getting Started
 
