@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:apivideo_uploader/src/types/environment.dart';
-import 'package:apivideo_uploader/src/types/video.dart';
+import 'package:video_uploader/src/types/environment.dart';
+import 'package:video_uploader/src/types/video.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:apivideo_uploader/apivideo_uploader.dart';
+import 'package:video_uploader/video_uploader.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -31,20 +31,20 @@ It allows you to upload videos in two ways:
 Run this command:
 
 ```bash
-flutter pub add apivideo_uploader
+flutter pub add video_uploader
  ```
  
 This will add the following lines to your package's pubspec.yaml file:
 
 ``` yaml
 dependencies:
-  apivideo_uploader: ^0.1.0
+  video_uploader: ^0.1.0
 ```
 
 ### Code sample
 
 ```dart
-import 'package:apivideo_uploader/apivideo_uploader.dart';
+import 'package:video_uploader/video_uploader.dart';
 
 var video = await ApiVideoUploader.uploadWithUploadToken("MY_VIDEO_TOKEN", "path/to/my-video.mp4");
 ```
