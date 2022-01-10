@@ -22,7 +22,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
     private val json = JSON()
     private val executor = Executors.newSingleThreadExecutor()
-    private var videoApi = VideosApi()
+    private var videosApi = VideosApi()
     private val progressiveUploadSessions =
         mutableMapOf<String, IProgressiveUploadSession>()
 
@@ -35,16 +35,29 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
         when (call.method) {
             "setApiKey" -> {
                 val apiKey = call.argument<String>("apiKey")
-                videoApi = if (apiKey != null) {
-                    VideosApi(apiKey, videoApi.apiClient.basePath)
+                val chunkSize = videosApi.apiClient.uploadChunkSize
+
+                videosApi = if (apiKey != null) {
+                    VideosApi(apiKey, videosApi.apiClient.basePath)
                 } else {
-                    VideosApi(videoApi.apiClient.basePath)
+                    VideosApi(videosApi.apiClient.basePath)
                 }
+                videosApi.apiClient.uploadChunkSize = chunkSize
             }
             "setEnvironment" -> {
                 call.argument<String>("environment")?.let {
-                    videoApi.apiClient.basePath = it
-                } ?: result.error("IO", "Environment is required", null)
+                    videosApi.apiClient.basePath = it
+                } ?: result.error("missing_environment", "Environment is missing", null)
+            }
+            "setChunkSize" -> {
+                call.argument<Int>("size")?.let {
+                    try {
+                        videosApi.apiClient.uploadChunkSize = it.toLong()
+                        result.success(videosApi.apiClient.uploadChunkSize)
+                    } catch (e: Exception) {
+                        result.error("failed_to_set_chunk_size", "Failed to set chunk size", e.message)
+                    }
+                } ?: result.error("missing_chunk_size", "Chunk size is missing", null)
             }
             "uploadWithUploadToken" -> {
                 val token = call.argument<String>("token")
@@ -52,13 +65,13 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                 val operationId = call.argument<String>("operationId")
                 when {
                     token == null -> {
-                        result.error("IO", "token is required", null)
+                        result.error("missing_token", "token is missing", null)
                     }
                     filePath == null -> {
-                        result.error("IO", "File path is required", null)
+                        result.error("missing_file_path", "File path is missing", null)
                     }
                     operationId == null -> {
-                        result.error("IO", "Operation id is required", null)
+                        result.error("missing_operation_id", "Operation id is missing", null)
                     }
                     else -> {
                         uploadWithUploadToken(token, filePath, operationId, result)
@@ -71,13 +84,13 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                 val operationId = call.argument<String>("operationId")
                 when {
                     videoId == null -> {
-                        result.error("IO", "videoId is required", null)
+                        result.error("missing_video_id", "videoId is missing", null)
                     }
                     filePath == null -> {
-                        result.error("IO", "File path is required", null)
+                        result.error("missing_file_path", "File path is missing", null)
                     }
                     operationId == null -> {
-                        result.error("IO", "Operation id is required", null)
+                        result.error("missing_operation_id", "Operation id is missing", null)
                     }
                     else -> {
                         upload(videoId, filePath, operationId, result)
@@ -86,14 +99,14 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
             }
             "createUploadSession" -> {
                 call.argument<String>("videoId")?.let {
-                    progressiveUploadSessions[it] = videoApi.createUploadProgressiveSession(it)
-                } ?: result.error("IO", "videoId is required", null)
+                    progressiveUploadSessions[it] = videosApi.createUploadProgressiveSession(it)
+                } ?: result.error("missing_video_id", "videoId is missing", null)
             }
             "createUploadWithUploadTokenSession" -> {
                 call.argument<String>("token")?.let {
                     progressiveUploadSessions[it] =
-                        videoApi.createUploadWithUploadTokenProgressiveSession(it)
-                } ?: result.error("IO", "token is required", null)
+                        videosApi.createUploadWithUploadTokenProgressiveSession(it)
+                } ?: result.error("missing_token", "token is missing", null)
             }
             "uploadPart" -> {
                 val videoId = call.argument<String>("videoId")
@@ -102,16 +115,16 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                 val operationId = call.argument<String>("operationId")
                 when {
                     (videoId == null) && (token == null) -> {
-                        result.error("IO", "videoId or token is required", null)
+                        result.error("missing_token_or_video_id", "videoId or token is missing", null)
                     }
                     (videoId != null) && (token != null) -> {
-                        result.error("IO", "Only one of videoId or token is required", null)
+                        result.error("either_token_or_video_id", "Only one of videoId or token is required", null)
                     }
                     filePath == null -> {
-                        result.error("IO", "File path is required", null)
+                        result.error("missing_file_path", "File path is missing", null)
                     }
                     operationId == null -> {
-                        result.error("IO", "Operation id is required", null)
+                        result.error("missing_operation_id", "Operation id is missing", null)
                     }
                     else -> {
                         progressiveUploadSessions[videoId ?: token]?.let {
@@ -123,7 +136,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                                 result
                             )
                         }
-                            ?: result.error("IO", "Unknown upload session", null)
+                            ?: result.error("unknown_upload_session", "Unknown upload session", null)
                     }
                 }
             }
@@ -134,16 +147,16 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                 val operationId = call.argument<String>("operationId")
                 when {
                     (videoId == null) && (token == null) -> {
-                        result.error("IO", "videoId or token is required", null)
+                        result.error("missing_token_or_video_id", "videoId or token is missing", null)
                     }
                     (videoId != null) && (token != null) -> {
-                        result.error("IO", "Only one of videoId or token is required", null)
+                        result.error("either_token_or_video_id", "Only one of videoId or token is required", null)
                     }
                     filePath == null -> {
-                        result.error("IO", "File path is required", null)
+                        result.error("missing_file_path", "File path is missing", null)
                     }
                     operationId == null -> {
-                        result.error("IO", "Operation id is required", null)
+                        result.error("missing_operation_id", "Operation id is missing", null)
                     }
                     else -> {
                         progressiveUploadSessions[videoId ?: token]?.let {
@@ -155,7 +168,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                                 result
                             )
                         }
-                            ?: result.error("IO", "Unknown upload session", null)
+                            ?: result.error("unknown_upload_session", "Unknown upload session", null)
                         progressiveUploadSessions.remove(videoId)
                     }
                 }
@@ -191,7 +204,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
         executor.execute {
             try {
                 val video =
-                    videoApi.uploadWithUploadToken(token, file) { bytesSent, totalBytes, _, _ ->
+                    videosApi.uploadWithUploadToken(token, file) { bytesSent, totalBytes, _, _ ->
                         postOnProgress(operationId, bytesSent, totalBytes)
                     }
                 postSuccess(json.serialize(video), result)
@@ -206,7 +219,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
 
         executor.execute {
             try {
-                val video = videoApi.upload(videoId, file) { bytesSent, totalBytes, _, _ ->
+                val video = videosApi.upload(videoId, file) { bytesSent, totalBytes, _, _ ->
                     postOnProgress(operationId, bytesSent, totalBytes)
                 }
                 postSuccess(json.serialize(video), result)

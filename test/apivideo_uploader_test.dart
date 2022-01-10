@@ -11,7 +11,7 @@ void main() {
   /// The mocked method channel
   const MethodChannel channel = const MethodChannel('video.api/uploader');
 
-  test('setApiKey', () async {
+  test('setEnvironment', () async {
     final environment = Environment.sandbox;
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       expect(methodCall.method, "setEnvironment");
@@ -22,7 +22,7 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('setEnvironment', () async {
+  test('setApiKey', () async {
     final apkiKey = "abcde";
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       expect(methodCall.method, "setApiKey");
@@ -30,6 +30,28 @@ void main() {
       return;
     });
     ApiVideoUploader.setApiKey(apkiKey);
+    channel.setMockMethodCallHandler(null);
+  });
+
+  test('setNullApiKey', () async {
+    String? apkiKey;
+    channel.setMockMethodCallHandler((MethodCall methodCall) async {
+      expect(methodCall.method, "setApiKey");
+      expect(methodCall.arguments["apiKey"], apkiKey);
+      return;
+    });
+    ApiVideoUploader.setApiKey(apkiKey);
+    channel.setMockMethodCallHandler(null);
+  });
+
+  test('setChunkSize', () async {
+    final chunkSize = 10000;
+    channel.setMockMethodCallHandler((MethodCall methodCall) async {
+      expect(methodCall.method, "setChunkSize");
+      expect(methodCall.arguments["size"], chunkSize);
+      return chunkSize;
+    });
+    ApiVideoUploader.setChunkSize(chunkSize);
     channel.setMockMethodCallHandler(null);
   });
 
