@@ -22,7 +22,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
     private val json = JSON()
     private val executor = Executors.newSingleThreadExecutor()
-    private var videoApi = VideosApi()
+    private var videosApi = VideosApi()
     private val progressiveUploadSessions =
         mutableMapOf<String, IProgressiveUploadSession>()
 
@@ -35,16 +35,29 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
         when (call.method) {
             "setApiKey" -> {
                 val apiKey = call.argument<String>("apiKey")
-                videoApi = if (apiKey != null) {
-                    VideosApi(apiKey, videoApi.apiClient.basePath)
+                val chunkSize = videosApi.apiClient.uploadChunkSize
+
+                videosApi = if (apiKey != null) {
+                    VideosApi(apiKey, videosApi.apiClient.basePath)
                 } else {
-                    VideosApi(videoApi.apiClient.basePath)
+                    VideosApi(videosApi.apiClient.basePath)
                 }
+                videosApi.apiClient.uploadChunkSize = chunkSize
             }
             "setEnvironment" -> {
                 call.argument<String>("environment")?.let {
-                    videoApi.apiClient.basePath = it
-                } ?: result.error("IO", "Environment is required", null)
+                    videosApi.apiClient.basePath = it
+                } ?: result.error("missing_environment", "Environment is missing", null)
+            }
+            "setChunkSize" -> {
+                call.argument<Int>("size")?.let {
+                    try {
+                        videosApi.apiClient.uploadChunkSize = it.toLong()
+                        result.success(videosApi.apiClient.uploadChunkSize)
+                    } catch (e: Exception) {
+                        result.error("failed_to_set_chunk_size", "Failed to set chunk size", e.message)
+                    }
+                } ?: result.error("IO", "Chunk size is required", null)
             }
             "uploadWithUploadToken" -> {
                 val token = call.argument<String>("token")
@@ -86,13 +99,13 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
             }
             "createUploadSession" -> {
                 call.argument<String>("videoId")?.let {
-                    progressiveUploadSessions[it] = videoApi.createUploadProgressiveSession(it)
+                    progressiveUploadSessions[it] = videosApi.createUploadProgressiveSession(it)
                 } ?: result.error("IO", "videoId is required", null)
             }
             "createUploadWithUploadTokenSession" -> {
                 call.argument<String>("token")?.let {
                     progressiveUploadSessions[it] =
-                        videoApi.createUploadWithUploadTokenProgressiveSession(it)
+                        videosApi.createUploadWithUploadTokenProgressiveSession(it)
                 } ?: result.error("IO", "token is required", null)
             }
             "uploadPart" -> {
@@ -191,7 +204,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
         executor.execute {
             try {
                 val video =
-                    videoApi.uploadWithUploadToken(token, file) { bytesSent, totalBytes, _, _ ->
+                    videosApi.uploadWithUploadToken(token, file) { bytesSent, totalBytes, _, _ ->
                         postOnProgress(operationId, bytesSent, totalBytes)
                     }
                 postSuccess(json.serialize(video), result)
@@ -206,7 +219,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
 
         executor.execute {
             try {
-                val video = videoApi.upload(videoId, file) { bytesSent, totalBytes, _, _ ->
+                val video = videosApi.upload(videoId, file) { bytesSent, totalBytes, _, _ ->
                     postOnProgress(operationId, bytesSent, totalBytes)
                 }
                 postSuccess(json.serialize(video), result)

@@ -22,12 +22,20 @@ class ApiVideoUploader {
         <String, dynamic>{'environment': environment.basePath});
   }
 
-  /// Sets API key
+  /// Sets API key.
   ///
   /// You don't have to set an API key if you are using an upload token.
-  static void setApiKey(String apiKey) {
+  static void setApiKey(String? apiKey) {
     _ApiVideoMessaging()
         .invokeMethod('setApiKey', <String, dynamic>{'apiKey': apiKey});
+  }
+
+  /// Sets upload chunk [size].
+  ///
+  /// Returns the size of the chunk if it succeeded to set chunk size
+  static Future<int> setChunkSize(int size) async {
+    return await _ApiVideoMessaging()
+        .invokeMethod('setChunkSize', <String, dynamic>{'size': size});
   }
 
   /// Uploads [filePath] with an upload [token].

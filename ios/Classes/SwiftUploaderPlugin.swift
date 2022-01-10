@@ -20,13 +20,26 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                let apiKey = args["apiKey"] as? String {
                 ApiVideoUploader.apiKey = apiKey
             } else {
-                result(FlutterError.init(code: "IO", message: "apiKey is required", details: nil))
+                ApiVideoUploader.apiKey = nil
             }
             break
         case "setEnvironment":
             if let args = call.arguments as? Dictionary<String, Any>,
                let environment = args["environment"] as? String {
                 ApiVideoUploader.basePath = environment
+            } else {
+                result(FlutterError.init(code: "IO", message: "environment is required", details: nil))
+            }
+            break
+        case "setChunkSize":
+            if let args = call.arguments as? Dictionary<String, Any>,
+               let size = args["size"] as? Int {
+                do {
+                    try ApiVideoUploader.setChunkSize(chunkSize: size)
+                    result(ApiVideoUploader.getChunkSize())
+                } catch {
+                    result(FlutterError.init(code: "failed_to_set_chunk_size", message: "Failed to set chunk size", details: error.localizedDescription))
+                }
             } else {
                 result(FlutterError.init(code: "IO", message: "environment is required", details: nil))
             }
