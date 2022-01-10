@@ -28,7 +28,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                let environment = args["environment"] as? String {
                 ApiVideoUploader.basePath = environment
             } else {
-                result(FlutterError.init(code: "IO", message: "environment is required", details: nil))
+                result(FlutterError.init(code: "missing_environment", message: "environment is missing", details: nil))
             }
             break
         case "setChunkSize":
@@ -41,7 +41,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                     result(FlutterError.init(code: "failed_to_set_chunk_size", message: "Failed to set chunk size", details: error.localizedDescription))
                 }
             } else {
-                result(FlutterError.init(code: "IO", message: "environment is required", details: nil))
+                result(FlutterError.init(code: "missing_chunk_size", message: "Chunk size is missing", details: nil))
             }
             break
         case "uploadWithUploadToken":
@@ -52,7 +52,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             {
                 uploadWithUploadToken(token: token, filePath: filePath, operationId: operationId, result: result)
             } else {
-                result(FlutterError.init(code: "IO", message: "token and file path are required", details: nil))
+                result(FlutterError.init(code: "missing_parameters", message: "token and file path are missing", details: nil))
             }
             break
         case "upload":
@@ -63,7 +63,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             {
                 upload(videoId: videoId, filePath: filePath, operationId: operationId, result: result)
             } else {
-                result(FlutterError.init(code: "IO", message: "token and file path are required", details: nil))
+                result(FlutterError.init(code: "missing_parameters", message: "video id and file path are missing", details: nil))
             }
             break
         case "createUploadSession":
@@ -71,7 +71,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                let videoId = args["videoId"] as? String {
                 progressiveUploadSessions[videoId] = VideosAPI.buildProgressiveUploadSession(videoId: videoId)
             } else {
-                result(FlutterError.init(code: "IO", message: "videoId is required", details: nil))
+                result(FlutterError.init(code: "missing_video_id", message: "videoId is missing", details: nil))
             }
             break
         case "createUploadWithUploadTokenSession":
@@ -79,7 +79,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                let token = args["token"] as? String {
                 progressiveUploadSessions[token] = VideosAPI.buildProgressiveUploadWithUploadTokenSession(token: token)
             } else {
-                result(FlutterError.init(code: "IO", message: "token is required", details: nil))
+                result(FlutterError.init(code: "missing_token", message: "token is missing", details: nil))
             }
             break
         case "uploadPart":
@@ -90,19 +90,19 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                 let videoId = args["videoId"] as? String
                 let token = args["token"] as? String
                 if ((videoId == nil) && (token == nil)) {
-                    result(FlutterError.init(code: "IO", message: "videoId or token is required", details: nil))
+                    result(FlutterError.init(code: "missing_token_or_video_id", message: "videoId or token is missing", details: nil))
                 } else if ((videoId != nil) && (token != nil)) {
-                    result(FlutterError.init(code: "IO", message: "Only one of videoId or token is required", details: nil))
+                    result(FlutterError.init(code: "either_token_or_video_id", message: "Only one of videoId or token is required", details: nil))
                 } else {
                     if let session = progressiveUploadSessions[videoId ?? token!] {
                         uploadPart(session: session, filePath: filePath, operationId: operationId, result: result)
                     } else {
-                        result(FlutterError.init(code: "IO", message: "Unknown upload session", details: nil))
+                        result(FlutterError.init(code: "unknown_upload_session", message: "Unknown upload session", details: nil))
                     }
                 }
                 
             } else {
-                result(FlutterError.init(code: "IO", message: "File path is required", details: nil))
+                result(FlutterError.init(code: "missing_file_path", message: "File path is missing", details: nil))
             }
             break
         case "uploadLastPart":
@@ -113,19 +113,19 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                 let videoId = args["videoId"] as? String
                 let token = args["token"] as? String
                 if ((videoId == nil) && (token == nil)) {
-                    result(FlutterError.init(code: "IO", message: "videoId or token is required", details: nil))
+                    result(FlutterError.init(code: "missing_token_or_video_id", message: "videoId or token is missing", details: nil))
                 } else if ((videoId != nil) && (token != nil)) {
-                    result(FlutterError.init(code: "IO", message: "Only one of videoId or token is required", details: nil))
+                    result(FlutterError.init(code: "either_token_or_video_id", message: "Only one of videoId or token is required", details: nil))
                 } else {
                     if let session = progressiveUploadSessions[videoId ?? token!] {
                         uploadLastPart(session: session, filePath: filePath, operationId: operationId, result: result)
                     } else {
-                        result(FlutterError.init(code: "IO", message: "Unknown upload session", details: nil))
+                        result(FlutterError.init(code: "unknown_upload_session", message: "Unknown upload session", details: nil))
                     }
                 }
                 
             } else {
-                result(FlutterError.init(code: "IO", message: "File path is required", details: nil))
+                result(FlutterError.init(code: "missing_file_path", message: "File path is missing", details: nil))
             }
             break
         default:
@@ -142,21 +142,22 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                 result(String(decoding: json, as: UTF8.self))
                 return
             } catch {
-                result(FlutterError.init(code: "JSON", message: "Failed to serialize JSON", details: nil))
+                result(FlutterError.init(code: "failed_to_serialize", message: "Failed to serialize JSON", details: nil))
                 return
             }
         }
-        if let error = optionalError,
-           case let ErrorResponse.error(code, data, _, _) = error {
-            var message: String? = nil
-            if let data = data {
-                message = String(decoding: data, as: UTF8.self)
+        if let error = optionalError {
+            if case let ErrorResponse.error(code, data, _, _) = error {
+                var message: String? = nil
+                if let data = data {
+                    message = String(decoding: data, as: UTF8.self)
+                }
+                result(FlutterError.init(code: String(code), message: message, details: nil))
+                return
+            } else {
+                result(FlutterError.init(code: "upload_failed", message: error.localizedDescription, details: nil))
             }
-            result(FlutterError.init(code: String(code), message: message, details: nil))
-            return
         }
-        
-        result(FlutterError.init(code: "Unknown error", message: nil, details: nil))
     }
     
     private func manageProgress(operationId: String, progress: Progress) {
