@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'videoassets.dart';
-import 'videosource.dart';
+import 'video_assets.dart';
+import 'video_source.dart';
 import 'metadata.dart';
 
 part 'video.g.dart';

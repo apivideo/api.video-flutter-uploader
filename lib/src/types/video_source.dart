@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'videosourcelivestream.dart';
+import 'video_source_live_stream.dart';
 
-part 'videosource.g.dart';
+part 'video_source.g.dart';
 
 /// A source information about the video.
 @JsonSerializable()

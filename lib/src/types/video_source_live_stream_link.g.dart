@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'videosourcelivestreamlink.dart';
+part of 'video_source_live_stream_link.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

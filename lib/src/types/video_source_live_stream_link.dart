@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'videosourcelivestreamlink.g.dart';
+part 'video_source_live_stream_link.g.dart';
 
 @JsonSerializable()
 class VideoSourceLiveStreamLink {

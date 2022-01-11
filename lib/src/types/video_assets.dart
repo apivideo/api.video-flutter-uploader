@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'videoassets.g.dart';
+part 'video_assets.g.dart';
 
 /// Details about the video object that you can use to work with the video object.
 @JsonSerializable()

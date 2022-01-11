@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'videoassets.dart';
+part of 'video_assets.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
