@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:apivideo_uploader/apivideo_uploader.dart';
+import 'package:video_uploader/video_uploader.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
