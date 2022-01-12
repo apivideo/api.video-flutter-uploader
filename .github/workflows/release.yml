@@ -7,12 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Flutter
-        id: flutter
-        uses: DanTup/gh-actions/setup-flutter@master
+      - name: Publish
+        uses: sakebook/actions-flutter-pub-publisher@v1.4.0
         with:
-          channel: 2.5.3
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Publishing
-        run: flutter pub publish
+          credential: ${{ secrets.CREDENTIAL_JSON }}
+          flutter_package: true
+          skip_test: false
+          dry_run: false
