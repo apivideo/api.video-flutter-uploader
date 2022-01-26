@@ -29,6 +29,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "video.api/uploader")
         channel.setMethodCallHandler(this)
+        videosApi.apiClient.setApplicationName("flutter-uploader")
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {

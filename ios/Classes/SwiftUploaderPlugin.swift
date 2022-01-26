@@ -11,6 +11,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
         channel = FlutterMethodChannel(name: "video.api/uploader", binaryMessenger: registrar.messenger())
         let instance = SwiftUploaderPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel!)
+        try? ApiVideoUploader.setApplicationName(applicationName: "flutter-uploader")
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
