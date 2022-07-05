@@ -38,7 +38,7 @@ This will add the following lines to your package's pubspec.yaml file:
 
 ``` yaml
 dependencies:
-  video_uploader: ^0.1.0
+  video_uploader: ^1.0.0
 ```
 
 ### Code sample

@@ -1,6 +1,10 @@
 # Changelog
 All changes to this project will be documented in this file.
 
+## [1.0.0] - 2022-07-05
+- Add API to set application name
+- Use SDK name
+
 ## [0.1.1] - 2022-01-26
 - Define the application name when instanciating native uploader libraries
   
