@@ -38,6 +38,12 @@ class ApiVideoUploader {
         .invokeMethod('setChunkSize', <String, dynamic>{'size': size});
   }
 
+  /// Sets Application name.
+  static void setApplicationName(String name, String version) {
+    _ApiVideoMessaging().invokeMethod('setApplicationName',
+        <String, dynamic>{'name': name, 'version': version});
+  }
+
   /// Uploads [filePath] with an upload [token].
   ///
   /// Get upload progression with [onProgress].

@@ -11,11 +11,22 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
         channel = FlutterMethodChannel(name: "video.api/uploader", binaryMessenger: registrar.messenger())
         let instance = SwiftUploaderPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel!)
-        try? ApiVideoUploader.setApplicationName(applicationName: "flutter-uploader")
+        try? ApiVideoUploader.setSdkName(name: "flutter-uploader", version: "1.0.0")
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
+        case "setApplicationName":
+              if let args = call.arguments as? Dictionary<String, Any>,
+                 let name = args["name"] as? String,
+                 let version = args["version"] as? String {
+                  do {
+                      try ApiVideoUploader.setApplicationName(name: name, version: version)
+                  } catch {
+                      result(FlutterError.init(code: "failed_to_set_application_name", message: "Failed to set Application name", details: error.localizedDescription))
+                  }
+              }
+              break
         case "setApiKey":
             if let args = call.arguments as? Dictionary<String, Any>,
                let apiKey = args["apiKey"] as? String {

@@ -29,11 +29,21 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "video.api/uploader")
         channel.setMethodCallHandler(this)
-        videosApi.apiClient.setApplicationName("flutter-uploader")
+        videosApi.apiClient.setSdkName("flutter-uploader", "1.0.0")
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "setApplicationName" -> {
+                val name = call.argument<String>("name")
+                val version = call.argument<String>("version")
+
+                try {
+                    videosApi.apiClient.setApplicationName(name, version)
+                } catch (e: Exception) {
+                    result.error("failed_to_set_application_name", "Failed to set application name", null)
+                }
+            }
             "setApiKey" -> {
                 val apiKey = call.argument<String>("apiKey")
                 val chunkSize = videosApi.apiClient.uploadChunkSize
@@ -56,7 +66,11 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                         videosApi.apiClient.uploadChunkSize = it.toLong()
                         result.success(videosApi.apiClient.uploadChunkSize)
                     } catch (e: Exception) {
-                        result.error("failed_to_set_chunk_size", "Failed to set chunk size", e.message)
+                        result.error(
+                            "failed_to_set_chunk_size",
+                            "Failed to set chunk size",
+                            e.message
+                        )
                     }
                 } ?: result.error("missing_chunk_size", "Chunk size is missing", null)
             }
@@ -116,10 +130,18 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                 val operationId = call.argument<String>("operationId")
                 when {
                     (videoId == null) && (token == null) -> {
-                        result.error("missing_token_or_video_id", "videoId or token is missing", null)
+                        result.error(
+                            "missing_token_or_video_id",
+                            "videoId or token is missing",
+                            null
+                        )
                     }
                     (videoId != null) && (token != null) -> {
-                        result.error("either_token_or_video_id", "Only one of videoId or token is required", null)
+                        result.error(
+                            "either_token_or_video_id",
+                            "Only one of videoId or token is required",
+                            null
+                        )
                     }
                     filePath == null -> {
                         result.error("missing_file_path", "File path is missing", null)
@@ -137,7 +159,11 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                                 result
                             )
                         }
-                            ?: result.error("unknown_upload_session", "Unknown upload session", null)
+                            ?: result.error(
+                                "unknown_upload_session",
+                                "Unknown upload session",
+                                null
+                            )
                     }
                 }
             }
@@ -148,10 +174,18 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                 val operationId = call.argument<String>("operationId")
                 when {
                     (videoId == null) && (token == null) -> {
-                        result.error("missing_token_or_video_id", "videoId or token is missing", null)
+                        result.error(
+                            "missing_token_or_video_id",
+                            "videoId or token is missing",
+                            null
+                        )
                     }
                     (videoId != null) && (token != null) -> {
-                        result.error("either_token_or_video_id", "Only one of videoId or token is required", null)
+                        result.error(
+                            "either_token_or_video_id",
+                            "Only one of videoId or token is required",
+                            null
+                        )
                     }
                     filePath == null -> {
                         result.error("missing_file_path", "File path is missing", null)
@@ -169,7 +203,11 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                                 result
                             )
                         }
-                            ?: result.error("unknown_upload_session", "Unknown upload session", null)
+                            ?: result.error(
+                                "unknown_upload_session",
+                                "Unknown upload session",
+                                null
+                            )
                         progressiveUploadSessions.remove(videoId)
                     }
                 }
@@ -182,7 +220,11 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
         Handler(Looper.getMainLooper()).post {
             channel.invokeMethod(
                 "onProgress",
-                mapOf("operationId" to operationId, "bytesSent" to bytesSent, "totalBytes" to totalBytes)
+                mapOf(
+                    "operationId" to operationId,
+                    "bytesSent" to bytesSent,
+                    "totalBytes" to totalBytes
+                )
             )
         }
     }
@@ -199,7 +241,12 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    private fun uploadWithUploadToken(token: String, filePath: String, operationId: String, result: Result) {
+    private fun uploadWithUploadToken(
+        token: String,
+        filePath: String,
+        operationId: String,
+        result: Result
+    ) {
         val file = File(filePath)
 
         executor.execute {
