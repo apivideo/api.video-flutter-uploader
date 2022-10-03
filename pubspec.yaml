@@ -4,7 +4,6 @@ version: 1.0.0
 repository: https://github.com/apivideo/api.video-flutter-uploader
 issue_tracker: https://github.com/apivideo/api.video-flutter-uploader/issues
 homepage: https://api.video
-documentation: https://docs.api.video
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
