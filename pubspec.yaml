@@ -12,7 +12,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
   json_annotation: ^4.4.0
+  plugin_platform_interface: ^2.1.3
 
 
 dev_dependencies:
@@ -29,3 +32,6 @@ flutter:
         pluginClass: UploaderPlugin
       ios:
         pluginClass: UploaderPlugin
+      web:
+        pluginClass: ApiVideoUploaderPlugin
+        fileName: src/web/apivideo_uploader_web.dart
