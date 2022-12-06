@@ -8,23 +8,25 @@ const primaryColor = Color(0xFFFA5B30);
 const secondaryColor = Color(0xFFFFB39E);
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  var _imagePath;
+  late String _imagePath;
   final _tokenTextController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   double _progressValue = 0;
 
   void setProgress(double value) async {
-    this.setState(() {
-      this._progressValue = value;
+    setState(() {
+      _progressValue = value;
     });
   }
 
@@ -50,25 +52,25 @@ class _MyAppState extends State<MyApp> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 52,
                   ),
                   TextField(
                     cursorColor: primaryColor,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors.white, width: 2.0)),
+                        borderSide: BorderSide(color: Colors.white, width: 2.0),
+                      ),
                       focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: primaryColor, width: 2.0)),
+                        borderSide: BorderSide(color: primaryColor, width: 2.0),
+                      ),
                       hintText: 'My video token',
                     ),
                     controller: _tokenTextController,
                   ),
                   MaterialButton(
                     color: primaryColor,
-                    child: Text(
+                    child: const Text(
                       "Pick Video from Gallery",
                       style: TextStyle(
                           color: Colors.white70, fontWeight: FontWeight.bold),
@@ -89,7 +91,7 @@ class _MyAppState extends State<MyApp> {
                   ),
                   MaterialButton(
                     color: primaryColor,
-                    child: Text(
+                    child: const Text(
                       "Upload video",
                       style: TextStyle(
                           color: Colors.white70, fontWeight: FontWeight.bold),
@@ -101,7 +103,7 @@ class _MyAppState extends State<MyApp> {
                                 _tokenTextController.text, _imagePath,
                                 (bytesSent, totalByte) {
                           log("Progress : ${bytesSent / totalByte}");
-                          this.setProgress(bytesSent / totalByte);
+                          setProgress(bytesSent / totalByte);
                         });
                         log("Video : $video");
                         log("Title : ${video.title}");
