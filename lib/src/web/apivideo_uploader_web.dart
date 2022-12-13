@@ -24,10 +24,10 @@ class ApiVideoUploaderPlugin {
         final String token = call.arguments['token'];
         final String filePath = call.arguments['filePath'];
         final String operationId = call.arguments['operationId'];
-        print(call.arguments);
+        final String fileName = call.arguments['fileName'];
         ArgumentError.checkNotNull(token, 'upload token');
         ArgumentError.checkNotNull(filePath, 'file path');
-        return uploadWithUploadToken(token, filePath, operationId);
+        return uploadWithUploadToken(token, filePath, operationId, fileName);
       default:
         throw PlatformException(
           code: 'Unimplemented',
@@ -41,6 +41,7 @@ class ApiVideoUploaderPlugin {
     String token,
     String filePath,
     String operationId,
+    String fileName,
   ) async {
     if (channel == null) {
       throw Exception('Method channel for web platform is null');
@@ -48,12 +49,13 @@ class ApiVideoUploaderPlugin {
     js.context['manageUploadProgress'] = js.allowInterop(_manageUploadProgress);
     ScriptElement script = ScriptElement()
       ..innerText = '''
-      window.uploadWithUploadToken = async function(filePath, token, operationId) {
+      window.uploadWithUploadToken = async function(filePath, token, operationId, fileName) {
         var blob = await fetch(filePath)
           .then(r => r.blob());
         var uploader = new VideoUploader({
             file: blob,
             uploadToken: token,
+            videoName: fileName,
         });
         uploader.onProgress((e) => manageUploadProgress(operationId, e.uploadedBytes, e.totalBytes));
         var jsonObject = await uploader.upload();
@@ -73,6 +75,7 @@ class ApiVideoUploaderPlugin {
         filePath,
         token,
         operationId,
+        fileName,
       ),
     );
     document.body!.querySelector('#uploadWithUploadTokenScript')!.remove();

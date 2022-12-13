@@ -48,14 +48,22 @@ class ApiVideoUploader {
   ///
   /// Get upload progression with [onProgress].
   ///
+  /// For web usage only, you can provide a custom [fileName] to your uploaded video.
+  /// Default is "uploaded_file".
+  ///
   /// Alternatively for large file, you might want to use [ProgressiveUploadWithUploadTokenSession].
-  static Future<Video> uploadWithUploadToken(String token, String filePath,
-      [OnProgress? onProgress]) async {
+  static Future<Video> uploadWithUploadToken(
+    String token,
+    String filePath, [
+    OnProgress? onProgress,
+    String fileName = 'file',
+  ]) async {
     var videoJson = await _ApiVideoMessaging().invokeMethod(
         'uploadWithUploadToken',
         <String, dynamic>{
           'token': token,
           'filePath': filePath,
+          'fileName': fileName,
         },
         onProgress);
     return Video.fromJson(jsonDecode(videoJson));

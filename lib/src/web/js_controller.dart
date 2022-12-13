@@ -5,5 +5,8 @@ import 'package:js/js.dart';
 
 @JS('uploadWithUploadToken')
 external Future<String> jsUploadWithUploadToken(
-    String filePath, String token, String operationId,
-    [Function onProgress]);
+  String filePath,
+  String token,
+  String operationId,
+  String fileName,
+);
