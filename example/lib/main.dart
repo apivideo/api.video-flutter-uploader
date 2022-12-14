@@ -52,6 +52,10 @@ class _MyAppState extends State<MyApp> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  TextButton(
+                    child: Text('SET API KEY'),
+                    onPressed: () => ApiVideoUploader.setApiKey('FOOBAR'),
+                  ),
                   const SizedBox(
                     height: 52,
                   ),

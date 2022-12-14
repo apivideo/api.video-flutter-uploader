@@ -1,52 +1,31 @@
+import 'dart:convert';
 import 'dart:html';
 import 'dart:js_util';
 import 'dart:js' as js;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:video_uploader/src/api_video_uploader_platform_interface.dart';
+import 'package:video_uploader/src/video_uploader_mobile_platform.dart';
 import 'package:video_uploader/src/web/js_controller.dart';
 
-class ApiVideoUploaderPlugin {
-  static MethodChannel? channel;
+class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
+  late String _apiKey;
+
   static void registerWith(Registrar registrar) {
-    channel = MethodChannel(
-      'video.api/uploader',
-      const StandardMethodCodec(),
-      registrar.messenger,
-    );
-    final ApiVideoUploaderPlugin instance = ApiVideoUploaderPlugin();
-    channel!.setMethodCallHandler(instance.handleMethodCall);
+    ApiVideoUploaderPlatform.instance = ApiVideoUploaderPlugin();
   }
 
-  Future<dynamic> handleMethodCall(MethodCall call) async {
-    switch (call.method) {
-      case 'uploadWithUploadToken':
-        final String token = call.arguments['token'];
-        final String filePath = call.arguments['filePath'];
-        final String operationId = call.arguments['operationId'];
-        final String fileName = call.arguments['fileName'];
-        ArgumentError.checkNotNull(token, 'upload token');
-        ArgumentError.checkNotNull(filePath, 'file path');
-        return uploadWithUploadToken(token, filePath, operationId, fileName);
-      default:
-        throw PlatformException(
-          code: 'Unimplemented',
-          details: "The ApiVideoUploader plugin for web doesn't implement "
-              "the method '${call.method}'",
-        );
-    }
-  }
-
+  @override
   Future<String> uploadWithUploadToken(
     String token,
     String filePath,
-    String operationId,
-    String fileName,
-  ) async {
-    if (channel == null) {
-      throw Exception('Method channel for web platform is null');
+    String fileName, [
+    OnProgress? onProgress,
+  ]) async {
+    if (onProgress != null) {
+      js.context['onProgress'] = js.allowInterop(onProgress);
     }
-    js.context['manageUploadProgress'] = js.allowInterop(_manageUploadProgress);
     ScriptElement script = ScriptElement()
       ..innerText = '''
       window.uploadWithUploadToken = async function(filePath, token, operationId, fileName) {
@@ -57,7 +36,7 @@ class ApiVideoUploaderPlugin {
             uploadToken: token,
             videoName: fileName,
         });
-        uploader.onProgress((e) => manageUploadProgress(operationId, e.uploadedBytes, e.totalBytes));
+        uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
         var jsonObject = await uploader.upload();
         return JSON.stringify(jsonObject);
       };
@@ -74,7 +53,6 @@ class ApiVideoUploaderPlugin {
       jsUploadWithUploadToken(
         filePath,
         token,
-        operationId,
         fileName,
       ),
     );
@@ -82,18 +60,9 @@ class ApiVideoUploaderPlugin {
     return json;
   }
 
-  void _manageUploadProgress(
-    String operationId,
-    int completedUnitCount,
-    int totalUnitCount,
-  ) {
-    channel!.invokeMethod(
-      "onProgress",
-      {
-        "operationId": operationId,
-        "bytesSent": completedUnitCount,
-        "totalBytes": totalUnitCount,
-      },
-    );
+  @override
+  void setApiKey(String? apiKey) {
+    ArgumentError.checkNotNull(apiKey, 'api key');
+    print(apiKey);
   }
 }

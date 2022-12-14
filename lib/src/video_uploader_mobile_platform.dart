@@ -5,21 +5,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:video_uploader/src/api_video_uploader_platform_interface.dart';
 
-import 'src/types/environment.dart';
-import 'src/types/video.dart';
-export 'src/video_uploader_mobile_platform.dart';
+import 'types/environment.dart';
+import 'types/video.dart';
 
-export 'src/types.dart';
+export 'types.dart';
 
 /// Progress indicator callback
 typedef void OnProgress(int bytesSent, int totalBytes);
 
-ApiVideoUploaderPlatform get _uploaderPlatform {
-  return ApiVideoUploaderPlatform.instance;
-}
-
 /// A api.video uploader.
-class ApiVideoUploader {
+class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
+  static void registerWith() {
+    ApiVideoUploaderPlatform.instance = ApiVideoMobileUploaderPlugin();
+  }
+
   /// Sets [environment] API base path.
   ///
   /// By default, environment is set [Environment.production].
@@ -31,8 +30,10 @@ class ApiVideoUploader {
   /// Sets API key.
   ///
   /// You don't have to set an API key if you are using an upload token.
-  static void setApiKey(String? apiKey) {
-    return _uploaderPlatform.setApiKey(apiKey);
+  @override
+  void setApiKey(String? apiKey) {
+    _ApiVideoMessaging()
+        .invokeMethod('setApiKey', <String, dynamic>{'apiKey': apiKey});
   }
 
   /// Sets upload chunk [size].
@@ -57,14 +58,21 @@ class ApiVideoUploader {
   /// Default is "uploaded_file".
   ///
   /// Alternatively for large file, you might want to use [ProgressiveUploadWithUploadTokenSession].
-  static Future<Video> uploadWithUploadToken(
+  @override
+  Future<String> uploadWithUploadToken(
     String token,
-    String filePath, [
+    String filePath,
+    String fileName, [
     OnProgress? onProgress,
-    String fileName = 'file',
   ]) async {
-    return Video.fromJson(jsonDecode(await _uploaderPlatform
-        .uploadWithUploadToken(token, filePath, fileName, onProgress)));
+    var videoJson = await _ApiVideoMessaging().invokeMethod(
+        'uploadWithUploadToken',
+        <String, dynamic>{
+          'token': token,
+          'filePath': filePath,
+        },
+        onProgress);
+    return videoJson;
   }
 
   /// Uploads [filePath] to the [videoId].
