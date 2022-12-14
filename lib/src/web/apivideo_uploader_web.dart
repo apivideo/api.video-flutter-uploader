@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:html';
 import 'dart:js_util';
 import 'dart:js' as js;
 
-import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:video_uploader/src/api_video_uploader_platform_interface.dart';
 import 'package:video_uploader/src/video_uploader_mobile_platform.dart';
@@ -23,12 +21,14 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
     String fileName, [
     OnProgress? onProgress,
   ]) async {
-    if (onProgress != null) {
+    if (onProgress != null)
       js.context['onProgress'] = js.allowInterop(onProgress);
-    }
+    else
+      js.context['onProgress'] = null;
+
     ScriptElement script = ScriptElement()
       ..innerText = '''
-      window.uploadWithUploadToken = async function(filePath, token, operationId, fileName) {
+      window.uploadWithUploadToken = async function(filePath, token, fileName) {
         var blob = await fetch(filePath)
           .then(r => r.blob());
         var uploader = new VideoUploader({
@@ -36,7 +36,9 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             uploadToken: token,
             videoName: fileName,
         });
-        uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+        if (onProgress != null) {
+          uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+        }
         var jsonObject = await uploader.upload();
         return JSON.stringify(jsonObject);
       };
