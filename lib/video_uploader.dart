@@ -31,7 +31,7 @@ class ApiVideoUploader {
   /// Sets API key.
   ///
   /// You don't have to set an API key if you are using an upload token.
-  static void setApiKey(String? apiKey) {
+  static void setApiKey(String apiKey) {
     return _uploaderPlatform.setApiKey(apiKey);
   }
 
@@ -75,12 +75,9 @@ class ApiVideoUploader {
   ///
   /// Alternatively for large file, you might want to use [ProgressiveUploadSession].
   static Future<Video> upload(String videoId, String filePath,
-      [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod(
-        'upload',
-        <String, dynamic>{'videoId': videoId, 'filePath': filePath},
-        onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
+      [OnProgress? onProgress, String fileName = 'file']) async {
+    return Video.fromJson(jsonDecode(await _uploaderPlatform.upload(
+        videoId, filePath, fileName, onProgress)));
   }
 
   /// Creates a progressive upload session for [videoId].

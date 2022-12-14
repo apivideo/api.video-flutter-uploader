@@ -21,13 +21,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
     String fileName, [
     OnProgress? onProgress,
   ]) async {
-    if (onProgress != null)
-      js.context['onProgress'] = js.allowInterop(onProgress);
-    else
-      js.context['onProgress'] = null;
-
-    ScriptElement script = ScriptElement()
-      ..innerText = '''
+    final String script = '''
       window.uploadWithUploadToken = async function(filePath, token, fileName) {
         var blob = await fetch(filePath)
           .then(r => r.blob());
@@ -42,29 +36,69 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         var jsonObject = await uploader.upload();
         return JSON.stringify(jsonObject);
       };
-    '''
-      ..id = 'uploadWithUploadTokenScript';
-    script.innerHtml = script.innerHtml?.replaceAll('<br>', '');
+    ''';
+    return await useJsScript<String>(
+      onProgress: onProgress,
+      jsMethod: () => jsUploadWithUploadToken(filePath, token, fileName),
+      scriptContent: script,
+      scriptId: 'uploadWithUploadTokenScript',
+    );
+  }
+
+  @override
+  void setApiKey(String apiKey) => _apiKey = apiKey;
+
+  @override
+  Future<String> upload(String videoId, String filePath, String fileName,
+      [OnProgress? onProgress]) async {
+    final String script = '''
+      window.uploadWithApiKey = async function(filePath, apiKey, videoId, fileName) {
+        console.log(fileName);
+        var blob = await fetch(filePath)
+          .then(r => r.blob());
+        var uploader = new VideoUploader({
+            file: blob,
+            apiKey,
+            videoId,
+            videoName: fileName,
+        });
+        if (onProgress != null) {
+          uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+        }
+        var jsonObject = await uploader.upload();
+        return JSON.stringify(jsonObject);
+      };
+    ''';
+    return await useJsScript(
+      onProgress: onProgress,
+      jsMethod: () => jsUploadWithApiKey(filePath, _apiKey, videoId, fileName),
+      scriptContent: script,
+      scriptId: 'uploadWithApiKeyScript',
+    );
+  }
+
+  dynamic useJsScript<T>({
+    OnProgress? onProgress,
+    required Function jsMethod,
+    required String scriptContent,
+    required String scriptId,
+  }) async {
+    if (onProgress != null)
+      js.context['onProgress'] = js.allowInterop(onProgress);
+    else
+      js.context['onProgress'] = null;
+
+    final ScriptElement script = ScriptElement()
+      ..innerText = scriptContent
+      ..id = scriptId;
     if (document.body == null) {
       throw Exception(
         'No body tag found in the DOM: try to add a body tag to the DOM and retry.',
       );
     }
     document.body!.insertAdjacentElement('beforeend', script);
-    final String json = await promiseToFuture<String>(
-      jsUploadWithUploadToken(
-        filePath,
-        token,
-        fileName,
-      ),
-    );
-    document.body!.querySelector('#uploadWithUploadTokenScript')!.remove();
-    return json;
-  }
-
-  @override
-  void setApiKey(String? apiKey) {
-    ArgumentError.checkNotNull(apiKey, 'api key');
-    print(apiKey);
+    final res = await promiseToFuture<T>(jsMethod());
+    document.body!.querySelector('#$scriptId')!.remove();
+    return res;
   }
 }

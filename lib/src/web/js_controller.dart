@@ -9,3 +9,10 @@ external Future<String> jsUploadWithUploadToken(
   String token,
   String fileName,
 );
+@JS('uploadWithApiKey')
+external Future<String> jsUploadWithApiKey(
+  String filePath,
+  String apiKey,
+  String videoId,
+  String fileName,
+);

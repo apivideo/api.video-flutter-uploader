@@ -22,7 +22,7 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  void setApiKey(String? apiKey) {
+  void setApiKey(String apiKey) {
     throw UnimplementedError('setApiKey() has not been implemented.');
   }
 
@@ -35,6 +35,11 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
     throw UnimplementedError(
       'uploadWithUploadToken() has not been implemented.',
     );
+  }
+
+  Future<String> upload(String videoId, String filePath, String fileName,
+      [OnProgress? onProgress]) {
+    throw UnimplementedError('upload() has not been implemented.');
   }
 }
 

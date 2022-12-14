@@ -82,13 +82,14 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Get upload progression with [onProgress].
   ///
   /// Alternatively for large file, you might want to use [ProgressiveUploadSession].
-  static Future<Video> upload(String videoId, String filePath,
+  @override
+  Future<String> upload(String videoId, String filePath, String fileName,
       [OnProgress? onProgress]) async {
     var videoJson = await _ApiVideoMessaging().invokeMethod(
         'upload',
         <String, dynamic>{'videoId': videoId, 'filePath': filePath},
         onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
+    return videoJson;
   }
 
   /// Creates a progressive upload session for [videoId].
