@@ -83,7 +83,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   ///
   /// Alternatively for large file, you might want to use [ProgressiveUploadSession].
   @override
-  Future<String> upload(String videoId, String filePath, String fileName,
+  Future<String> upload(String videoId, String filePath,
       [OnProgress? onProgress]) async {
     var videoJson = await _ApiVideoMessaging().invokeMethod(
         'upload',

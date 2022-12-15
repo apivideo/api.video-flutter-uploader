@@ -37,7 +37,7 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
     );
   }
 
-  Future<String> upload(String videoId, String filePath, String fileName,
+  Future<String> upload(String videoId, String filePath,
       [OnProgress? onProgress]) {
     throw UnimplementedError('upload() has not been implemented.');
   }

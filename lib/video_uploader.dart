@@ -75,9 +75,9 @@ class ApiVideoUploader {
   ///
   /// Alternatively for large file, you might want to use [ProgressiveUploadSession].
   static Future<Video> upload(String videoId, String filePath,
-      [OnProgress? onProgress, String fileName = 'file']) async {
-    return Video.fromJson(jsonDecode(await _uploaderPlatform.upload(
-        videoId, filePath, fileName, onProgress)));
+      [OnProgress? onProgress]) async {
+    return Video.fromJson(jsonDecode(
+        await _uploaderPlatform.upload(videoId, filePath, onProgress)));
   }
 
   /// Creates a progressive upload session for [videoId].

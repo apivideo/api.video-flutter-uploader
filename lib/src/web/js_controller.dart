@@ -14,5 +14,4 @@ external Future<String> jsUploadWithApiKey(
   String filePath,
   String apiKey,
   String videoId,
-  String fileName,
 );

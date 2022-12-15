@@ -49,18 +49,16 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   void setApiKey(String apiKey) => _apiKey = apiKey;
 
   @override
-  Future<String> upload(String videoId, String filePath, String fileName,
+  Future<String> upload(String videoId, String filePath,
       [OnProgress? onProgress]) async {
     final String script = '''
-      window.uploadWithApiKey = async function(filePath, apiKey, videoId, fileName) {
-        console.log(fileName);
+      window.uploadWithApiKey = async function(filePath, apiKey, videoId) {
         var blob = await fetch(filePath)
           .then(r => r.blob());
         var uploader = new VideoUploader({
             file: blob,
             apiKey,
             videoId,
-            videoName: fileName,
         });
         if (onProgress != null) {
           uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
@@ -71,7 +69,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
     ''';
     return await useJsScript(
       onProgress: onProgress,
-      jsMethod: () => jsUploadWithApiKey(filePath, _apiKey, videoId, fileName),
+      jsMethod: () => jsUploadWithApiKey(filePath, _apiKey, videoId),
       scriptContent: script,
       scriptId: 'uploadWithApiKeyScript',
     );
