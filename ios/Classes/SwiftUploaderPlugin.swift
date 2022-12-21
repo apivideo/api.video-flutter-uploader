@@ -78,7 +78,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                 result(FlutterError.init(code: "missing_parameters", message: "video id and file path are missing", details: nil))
             }
             break
-        case "createUploadSession":
+        case "createProgressiveUploadSession":
             if let args = call.arguments as? Dictionary<String, Any>,
                let videoId = args["videoId"] as? String {
                 progressiveUploadSessions[videoId] = VideosAPI.buildProgressiveUploadSession(videoId: videoId)
@@ -86,7 +86,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                 result(FlutterError.init(code: "missing_video_id", message: "videoId is missing", details: nil))
             }
             break
-        case "createUploadWithUploadTokenSession":
+        case "createProgressiveUploadWithUploadTokenSession":
             if let args = call.arguments as? Dictionary<String, Any>,
                let token = args["token"] as? String {
                 progressiveUploadSessions[token] = VideosAPI.buildProgressiveUploadWithUploadTokenSession(token: token)

@@ -41,7 +41,11 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                 try {
                     videosApi.apiClient.setApplicationName(name, version)
                 } catch (e: Exception) {
-                    result.error("failed_to_set_application_name", "Failed to set application name", null)
+                    result.error(
+                        "failed_to_set_application_name",
+                        "Failed to set application name",
+                        null
+                    )
                 }
             }
             "setApiKey" -> {
@@ -112,12 +116,12 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                     }
                 }
             }
-            "createUploadSession" -> {
+            "createProgressiveUploadSession" -> {
                 call.argument<String>("videoId")?.let {
                     progressiveUploadSessions[it] = videosApi.createUploadProgressiveSession(it)
                 } ?: result.error("missing_video_id", "videoId is missing", null)
             }
-            "createUploadWithUploadTokenSession" -> {
+            "createProgressiveUploadWithUploadTokenSession" -> {
                 call.argument<String>("token")?.let {
                     progressiveUploadSessions[it] =
                         videosApi.createUploadWithUploadTokenProgressiveSession(it)

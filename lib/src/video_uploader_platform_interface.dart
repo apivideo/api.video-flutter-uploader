@@ -54,6 +54,40 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
       [OnProgress? onProgress]) {
     throw UnimplementedError('upload() has not been implemented.');
   }
+
+  // Progressive upload with upload token
+  void createProgressiveUploadWithUploadTokenSession(String token) {
+    throw UnimplementedError(
+      'createProgressiveUploadSession() has not been implemented.',
+    );
+  }
+
+  Future<String> uploadWithUploadTokenPart(String token, String filePath,
+      [OnProgress? onProgress]) {
+    throw UnimplementedError('uploadPart() has not been implemented.');
+  }
+
+  Future<String> uploadWithUploadTokenLastPart(String token, String filePath,
+      [OnProgress? onProgress]) {
+    throw UnimplementedError('uploadLastPart() has not been implemented.');
+  }
+
+  // Progressive upload
+  void createProgressiveUploadSession(String videoId) {
+    throw UnimplementedError(
+      'createProgressiveUploadSession() has not been implemented.',
+    );
+  }
+
+  Future<String> uploadPart(String videoId, String filePath,
+      [OnProgress? onProgress]) {
+    throw UnimplementedError('uploadPart() has not been implemented.');
+  }
+
+  Future<String> uploadLastPart(String videoId, String filePath,
+      [OnProgress? onProgress]) {
+    throw UnimplementedError('uploadLastPart() has not been implemented.');
+  }
 }
 
 class _PlatformImplementation extends ApiVideoUploaderPlatform {}

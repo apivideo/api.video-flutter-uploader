@@ -1,17 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'types/environment.dart';
-import 'types/video.dart';
+import '../video_uploader.dart';
 import 'video_uploader_platform_interface.dart';
 
 export 'types.dart';
-
-/// Progress indicator callback
-typedef void OnProgress(int bytesSent, int totalBytes);
 
 /// A api.video uploader.
 class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
@@ -98,37 +93,23 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
     return videoJson;
   }
 
+  // Progressive upload with upload token
   /// Creates a progressive upload session for [videoId].
-  static ProgressiveUploadSession createProgressiveUploadSession(
-      String videoId) {
-    return ProgressiveUploadSession(videoId);
-  }
-
-  /// Creates a progressive upload session with upload [token].
-  static ProgressiveUploadWithUploadTokenSession
-      createProgressiveUploadWithUploadTokenSession(String token) {
-    return ProgressiveUploadWithUploadTokenSession(token);
-  }
-}
-
-/// A session that manages progressive upload with upload token.
-class ProgressiveUploadWithUploadTokenSession {
-  /// The video token
-  final String token;
-
-  /// Creates a progressive upload with upload [token].
-  ProgressiveUploadWithUploadTokenSession(this.token) {
-    _ApiVideoMessaging().invokeMethod('createUploadWithUploadTokenSession',
+  @override
+  void createProgressiveUploadWithUploadTokenSession(String token) {
+    _ApiVideoMessaging().invokeMethod(
+        'createProgressiveUploadWithUploadTokenSession',
         <String, dynamic>{'token': token});
   }
 
   /// Uploads a part of a large video file.
   ///
   /// Get upload progression with [onProgress].
-  Future<Video> uploadPart(String filePath, [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod('uploadPart',
+  @override
+  Future<String> uploadWithUploadTokenPart(String token, String filePath,
+      [OnProgress? onProgress]) async {
+    return await _ApiVideoMessaging().invokeMethod('uploadPart',
         <String, dynamic>{'token': token, 'filePath': filePath}, onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
   }
 
   /// Uploads the last part of a large video file.
@@ -136,23 +117,21 @@ class ProgressiveUploadWithUploadTokenSession {
   /// Once called, you must not use this progressive upload session anymore.
   ///
   /// Get upload progression with [onProgress].
-  Future<Video> uploadLastPart(String filePath,
+  @override
+  Future<String> uploadWithUploadTokenLastPart(String token, String filePath,
       [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod('uploadLastPart',
+    return await _ApiVideoMessaging().invokeMethod('uploadLastPart',
         <String, dynamic>{'token': token, 'filePath': filePath}, onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
   }
-}
 
-/// A session that manages progressive upload.
-class ProgressiveUploadSession {
-  /// The video identifier.
-  final String videoId;
-
-  /// Creates a progressive upload for [videoId].
-  ProgressiveUploadSession(this.videoId) {
-    _ApiVideoMessaging().invokeMethod(
-        'createUploadSession', <String, dynamic>{'videoId': videoId});
+  // Progressive upload
+  /// Creates a progressive upload session with upload [token].
+  @override
+  void createProgressiveUploadSession(String videoId) {
+    _ApiVideoMessaging()
+        .invokeMethod('createProgressiveUploadSession', <String, dynamic>{
+      'videoId': videoId,
+    });
   }
 
   /// Uploads a part of a large video file.
@@ -160,12 +139,12 @@ class ProgressiveUploadSession {
   /// You have to set the API key with [setApiKey] before.
   ///
   /// Get upload progression with [onProgress].
-  Future<Video> uploadPart(String filePath, [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod(
+  Future<String> uploadPart(String videoId, String filePath,
+      [OnProgress? onProgress]) async {
+    return await _ApiVideoMessaging().invokeMethod(
         'uploadPart',
         <String, dynamic>{'videoId': videoId, 'filePath': filePath},
         onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
   }
 
   /// Uploads the last part of a large video file.
@@ -175,13 +154,12 @@ class ProgressiveUploadSession {
   /// Once called, you must not use this progressive upload session anymore.
   ///
   /// Get upload progression with [onProgress].
-  Future<Video> uploadLastPart(String filePath,
+  Future<String> uploadLastPart(String videoId, String filePath,
       [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod(
+    return await _ApiVideoMessaging().invokeMethod(
         'uploadLastPart',
         <String, dynamic>{'videoId': videoId, 'filePath': filePath},
         onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
   }
 }
 

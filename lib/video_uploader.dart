@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-
 import 'src/types/environment.dart';
 import 'src/types/video.dart';
 import 'src/video_uploader_platform_interface.dart';
@@ -97,17 +94,15 @@ class ProgressiveUploadWithUploadTokenSession {
 
   /// Creates a progressive upload with upload [token].
   ProgressiveUploadWithUploadTokenSession(this.token) {
-    _ApiVideoMessaging().invokeMethod('createUploadWithUploadTokenSession',
-        <String, dynamic>{'token': token});
+    _uploaderPlatform.createProgressiveUploadWithUploadTokenSession(token);
   }
 
   /// Uploads a part of a large video file.
   ///
   /// Get upload progression with [onProgress].
   Future<Video> uploadPart(String filePath, [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod('uploadPart',
-        <String, dynamic>{'token': token, 'filePath': filePath}, onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
+    return Video.fromJson(jsonDecode(await _uploaderPlatform
+        .uploadWithUploadTokenPart(token, filePath, onProgress)));
   }
 
   /// Uploads the last part of a large video file.
@@ -117,9 +112,8 @@ class ProgressiveUploadWithUploadTokenSession {
   /// Get upload progression with [onProgress].
   Future<Video> uploadLastPart(String filePath,
       [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod('uploadLastPart',
-        <String, dynamic>{'token': token, 'filePath': filePath}, onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
+    return Video.fromJson(jsonDecode(await _uploaderPlatform
+        .uploadWithUploadTokenLastPart(token, filePath, onProgress)));
   }
 }
 
@@ -130,8 +124,7 @@ class ProgressiveUploadSession {
 
   /// Creates a progressive upload for [videoId].
   ProgressiveUploadSession(this.videoId) {
-    _ApiVideoMessaging().invokeMethod(
-        'createUploadSession', <String, dynamic>{'videoId': videoId});
+    _uploaderPlatform.createProgressiveUploadSession(videoId);
   }
 
   /// Uploads a part of a large video file.
@@ -140,11 +133,8 @@ class ProgressiveUploadSession {
   ///
   /// Get upload progression with [onProgress].
   Future<Video> uploadPart(String filePath, [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod(
-        'uploadPart',
-        <String, dynamic>{'videoId': videoId, 'filePath': filePath},
-        onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
+    return Video.fromJson(jsonDecode(
+        await _uploaderPlatform.uploadPart(videoId, filePath, onProgress)));
   }
 
   /// Uploads the last part of a large video file.
@@ -156,69 +146,7 @@ class ProgressiveUploadSession {
   /// Get upload progression with [onProgress].
   Future<Video> uploadLastPart(String filePath,
       [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod(
-        'uploadLastPart',
-        <String, dynamic>{'videoId': videoId, 'filePath': filePath},
-        onProgress);
-    return Video.fromJson(jsonDecode(videoJson));
-  }
-}
-
-/// A singleton that manages communication between dart and native
-class _ApiVideoMessaging {
-  /// The communication channel
-  final MethodChannel _channel = const MethodChannel('video.api/uploader');
-
-  /// The map between id and progress callback
-  final _onProgressMap = Map<String, OnProgress?>();
-  static final _ApiVideoMessaging _apiVideoMessaging =
-      _ApiVideoMessaging._internal();
-
-  factory _ApiVideoMessaging() {
-    return _apiVideoMessaging;
-  }
-
-  _ApiVideoMessaging._internal() {
-    _setMethodCallHandler();
-  }
-
-  /// Registers method call handler to intercep messages from native parts
-  void _setMethodCallHandler() {
-    _channel.setMethodCallHandler((call) async {
-      switch (call.method) {
-        case "onProgress":
-          final String id = call.arguments["operationId"];
-          if (_onProgressMap[id] != null) {
-            final int bytesSent = call.arguments["bytesSent"];
-            final int totalBytes = call.arguments["totalBytes"];
-            _onProgressMap[id]!(bytesSent, totalBytes);
-          }
-          break;
-      }
-      return;
-    });
-  }
-
-  /// Register a [onProgress] listener in [OnProgress] indicator callback list
-  String _addProgressCallback(OnProgress? onProgress) {
-    final id = UniqueKey().toString();
-    _onProgressMap[id] = onProgress;
-    return id;
-  }
-
-  /// Unregister a listener named [id] in the onProgress indicator callback list
-  void _removeProgressCallback(String id) {
-    _onProgressMap.remove(id);
-  }
-
-  /// Invokes a [method] on api.video uploader channel with the specified
-  /// [arguments].
-  Future<T?> invokeMethod<T>(String method,
-      [dynamic arguments, OnProgress? onProgress]) async {
-    String operationId = _addProgressCallback(onProgress);
-    arguments["operationId"] = operationId;
-    final result = await _channel.invokeMethod<T>(method, arguments);
-    _removeProgressCallback(operationId);
-    return result;
+    return Video.fromJson(jsonDecode(
+        await _uploaderPlatform.uploadLastPart(videoId, filePath, onProgress)));
   }
 }
