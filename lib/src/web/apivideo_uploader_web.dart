@@ -3,9 +3,11 @@ import 'dart:js_util';
 import 'dart:js' as js;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:video_uploader/src/api_video_uploader_platform_interface.dart';
-import 'package:video_uploader/src/video_uploader_mobile_platform.dart';
-import 'package:video_uploader/src/web/js_controller.dart';
+
+import '../../video_uploader.dart';
+import '../video_uploader_platform_interface.dart';
+import 'js_controller.dart';
+
 
 class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   late String _apiKey;

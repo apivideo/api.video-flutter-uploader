@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'package:video_uploader/src/types/environment.dart';
-import 'package:video_uploader/src/types/video.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:video_uploader/video_uploader.dart';
@@ -24,17 +22,6 @@ void main() {
 
   test('setApiKey', () async {
     final apkiKey = "abcde";
-    channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "setApiKey");
-      expect(methodCall.arguments["apiKey"], apkiKey);
-      return;
-    });
-    ApiVideoUploader.setApiKey(apkiKey);
-    channel.setMockMethodCallHandler(null);
-  });
-
-  test('setNullApiKey', () async {
-    String? apkiKey;
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       expect(methodCall.method, "setApiKey");
       expect(methodCall.arguments["apiKey"], apkiKey);

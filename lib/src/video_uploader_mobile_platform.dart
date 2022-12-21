@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:video_uploader/src/api_video_uploader_platform_interface.dart';
 
 import 'types/environment.dart';
 import 'types/video.dart';
+import 'video_uploader_platform_interface.dart';
 
 export 'types.dart';
 
@@ -22,7 +22,8 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Sets [environment] API base path.
   ///
   /// By default, environment is set [Environment.production].
-  static void setEnvironment(Environment environment) {
+  @override
+  void setEnvironment(Environment environment) {
     _ApiVideoMessaging().invokeMethod('setEnvironment',
         <String, dynamic>{'environment': environment.basePath});
   }
@@ -39,13 +40,18 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Sets upload chunk [size].
   ///
   /// Returns the size of the chunk if it succeeded to set chunk size
-  static Future<int> setChunkSize(int size) async {
-    return await _ApiVideoMessaging()
+  @override
+  void setChunkSize(int size) async {
+    int chunkSize = await _ApiVideoMessaging()
         .invokeMethod('setChunkSize', <String, dynamic>{'size': size});
+    if (chunkSize != size) {
+      throw Exception('Failed to set chunk size');
+    }
   }
 
   /// Sets Application name.
-  static void setApplicationName(String name, String version) {
+  @override
+  void setApplicationName(String name, String version) {
     _ApiVideoMessaging().invokeMethod('setApplicationName',
         <String, dynamic>{'name': name, 'version': version});
   }

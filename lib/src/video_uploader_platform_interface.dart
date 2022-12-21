@@ -1,5 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:video_uploader/src/video_uploader_mobile_platform.dart';
+
+import '../video_uploader.dart';
 
 abstract class ApiVideoUploaderPlatform extends PlatformInterface {
   /// Constructs a ApiVideoUploaderPlatform.
@@ -22,8 +23,20 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  void setEnvironment(Environment environment) {
+    throw UnimplementedError('setEnvironment() has not been implemented.');
+  }
+
   void setApiKey(String apiKey) {
     throw UnimplementedError('setApiKey() has not been implemented.');
+  }
+
+  void setChunkSize(int size) {
+    throw UnimplementedError('setChunkSize() has not been implemented.');
+  }
+
+  void setApplicationName(String name, String version) {
+    throw UnimplementedError('setApplicationName() has not been implemented.');
   }
 
   Future<String> uploadWithUploadToken(
