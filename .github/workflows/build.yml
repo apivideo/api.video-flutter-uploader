@@ -1,26 +1,60 @@
 name: Build
-on: [push]
-
-defaults:
-  run:
-    working-directory: example/
+on: [ push ]
 
 jobs:
   build_ios:
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: example/
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Flutter
         id: flutter
-        uses: DanTup/gh-actions/setup-flutter@master
+        uses: subosito/flutter-action@v2
         with:
-          channel: 2.5.3
+          channel: 'stable'
       - name: Install dependencies
         run: flutter pub get
       - name: Build iOS application
         run: flutter build ios --no-codesign
 
   build_android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Flutter
+        id: flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build Android application
+        run: flutter build apk
+
+  build_web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Flutter
+        id: flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build Web application
+        run: flutter build web
+
+  run_tests:
+    needs: [ build_web, build_android, build_ios ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,5 +65,33 @@ jobs:
           channel: 2.5.3
       - name: Install dependencies
         run: flutter pub get
-      - name: Build Android application
-        run: flutter build apk
+      - name: Run tests
+        run: flutter test
+
+  analyze_project:
+    needs: run_tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Flutter
+        id: flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Flutter analyze
+        run: flutter analyze
+
+  test_publish:
+    needs: analyze_project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Flutter
+        id: flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: test flutter pub publish --dry-run
+        run: flutter pub publish --dry-run
