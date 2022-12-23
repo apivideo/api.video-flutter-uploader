@@ -7,7 +7,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   /// The mocked method channel
-  const MethodChannel channel = const MethodChannel('video.api/uploader');
+  const MethodChannel channel = const MethodChannel('video.api.uploader');
 
   test('setEnvironment', () async {
     final environment = Environment.sandbox;

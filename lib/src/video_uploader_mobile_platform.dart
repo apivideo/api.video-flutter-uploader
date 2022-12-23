@@ -10,6 +10,10 @@ export 'types.dart';
 
 /// A api.video uploader.
 class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
+  /// The communication channel
+  final MethodChannel _channel = const MethodChannel('video.api.uploader');
+  late final _UploadChannel _uploadChannel = _UploadChannel(_channel);
+
   static void registerWith() {
     ApiVideoUploaderPlatform.instance = ApiVideoMobileUploaderPlugin();
   }
@@ -19,7 +23,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// By default, environment is set [Environment.production].
   @override
   void setEnvironment(Environment environment) {
-    _ApiVideoMessaging().invokeMethod('setEnvironment',
+    _channel.invokeMethod('setEnvironment',
         <String, dynamic>{'environment': environment.basePath});
   }
 
@@ -28,8 +32,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// You don't have to set an API key if you are using an upload token.
   @override
   void setApiKey(String? apiKey) {
-    _ApiVideoMessaging()
-        .invokeMethod('setApiKey', <String, dynamic>{'apiKey': apiKey});
+    _channel.invokeMethod('setApiKey', <String, dynamic>{'apiKey': apiKey});
   }
 
   /// Sets upload chunk [size].
@@ -37,7 +40,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Returns the size of the chunk if it succeeded to set chunk size
   @override
   void setChunkSize(int size) async {
-    int chunkSize = await _ApiVideoMessaging()
+    int chunkSize = await _channel
         .invokeMethod('setChunkSize', <String, dynamic>{'size': size});
     if (chunkSize != size) {
       throw Exception('Failed to set chunk size');
@@ -47,7 +50,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Sets Application name.
   @override
   void setApplicationName(String name, String version) {
-    _ApiVideoMessaging().invokeMethod('setApplicationName',
+    _channel.invokeMethod('setApplicationName',
         <String, dynamic>{'name': name, 'version': version});
   }
 
@@ -66,7 +69,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
     String fileName, [
     OnProgress? onProgress,
   ]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod(
+    var videoJson = await _uploadChannel.invokeMethod(
         'uploadWithUploadToken',
         <String, dynamic>{
           'token': token,
@@ -86,7 +89,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   @override
   Future<String> upload(String videoId, String filePath,
       [OnProgress? onProgress]) async {
-    var videoJson = await _ApiVideoMessaging().invokeMethod(
+    var videoJson = await _uploadChannel.invokeMethod(
         'upload',
         <String, dynamic>{'videoId': videoId, 'filePath': filePath},
         onProgress);
@@ -97,8 +100,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Creates a progressive upload session for [videoId].
   @override
   void createProgressiveUploadWithUploadTokenSession(String token) {
-    _ApiVideoMessaging().invokeMethod(
-        'createProgressiveUploadWithUploadTokenSession',
+    _channel.invokeMethod('createProgressiveUploadWithUploadTokenSession',
         <String, dynamic>{'token': token});
   }
 
@@ -108,7 +110,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   @override
   Future<String> uploadWithUploadTokenPart(String token, String filePath,
       [OnProgress? onProgress]) async {
-    return await _ApiVideoMessaging().invokeMethod('uploadPart',
+    return await _uploadChannel.invokeMethod('uploadPart',
         <String, dynamic>{'token': token, 'filePath': filePath}, onProgress);
   }
 
@@ -120,7 +122,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   @override
   Future<String> uploadWithUploadTokenLastPart(String token, String filePath,
       [OnProgress? onProgress]) async {
-    return await _ApiVideoMessaging().invokeMethod('uploadLastPart',
+    return await _uploadChannel.invokeMethod('uploadLastPart',
         <String, dynamic>{'token': token, 'filePath': filePath}, onProgress);
   }
 
@@ -128,8 +130,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Creates a progressive upload session with upload [token].
   @override
   void createProgressiveUploadSession(String videoId) {
-    _ApiVideoMessaging()
-        .invokeMethod('createProgressiveUploadSession', <String, dynamic>{
+    _channel.invokeMethod('createProgressiveUploadSession', <String, dynamic>{
       'videoId': videoId,
     });
   }
@@ -141,7 +142,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Get upload progression with [onProgress].
   Future<String> uploadPart(String videoId, String filePath,
       [OnProgress? onProgress]) async {
-    return await _ApiVideoMessaging().invokeMethod(
+    return await _uploadChannel.invokeMethod(
         'uploadPart',
         <String, dynamic>{'videoId': videoId, 'filePath': filePath},
         onProgress);
@@ -156,46 +157,44 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Get upload progression with [onProgress].
   Future<String> uploadLastPart(String videoId, String filePath,
       [OnProgress? onProgress]) async {
-    return await _ApiVideoMessaging().invokeMethod(
+    return await _uploadChannel.invokeMethod(
         'uploadLastPart',
         <String, dynamic>{'videoId': videoId, 'filePath': filePath},
         onProgress);
   }
 }
 
-/// A singleton that manages communication between dart and native
-class _ApiVideoMessaging {
+/// A wrapper around upload calls to manage progress callback.
+class _UploadChannel {
   /// The communication channel
-  final MethodChannel _channel = const MethodChannel('video.api/uploader');
+  final MethodChannel _channel;
+
+  /// The uploader events channel
+  final eventChannel = const EventChannel('video.api.uploader/events');
+
+  _UploadChannel(this._channel) {
+    eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
+  }
 
   /// The map between id and progress callback
   final _onProgressMap = Map<String, OnProgress?>();
-  static final _ApiVideoMessaging _apiVideoMessaging =
-      _ApiVideoMessaging._internal();
 
-  factory _ApiVideoMessaging() {
-    return _apiVideoMessaging;
-  }
-
-  _ApiVideoMessaging._internal() {
-    _setMethodCallHandler();
-  }
-
-  /// Registers method call handler to intercep messages from native parts
-  void _setMethodCallHandler() {
-    _channel.setMethodCallHandler((call) async {
-      switch (call.method) {
-        case "onProgress":
-          final String id = call.arguments["operationId"];
-          if (_onProgressMap[id] != null) {
-            final int bytesSent = call.arguments["bytesSent"];
-            final int totalBytes = call.arguments["totalBytes"];
-            _onProgressMap[id]!(bytesSent, totalBytes);
-          }
-          break;
+  /// Registers method call handler to intercept messages from native parts
+  void _onEvent(dynamic event) {
+    if (event["type"] == "progressChanged") {
+      final String id = event["uploadId"];
+      if (_onProgressMap[id] != null) {
+        final int bytesSent = event["bytesSent"];
+        final int totalBytes = event["totalBytes"];
+        _onProgressMap[id]!(bytesSent, totalBytes);
       }
-      return;
-    });
+    } else {
+      print("Unknown event type: ${event["type"]}");
+    }
+  }
+
+  void _onError(Object error) {
+    print('upload error: $error');
   }
 
   /// Register a [onProgress] listener in [OnProgress] indicator callback list
@@ -210,14 +209,29 @@ class _ApiVideoMessaging {
     _onProgressMap.remove(id);
   }
 
-  /// Invokes a [method] on api.video uploader channel with the specified
+  /// Invokes a [method] with [OnProgress] callback with the specified
   /// [arguments].
   Future<T?> invokeMethod<T>(String method,
       [dynamic arguments, OnProgress? onProgress]) async {
-    String operationId = _addProgressCallback(onProgress);
-    arguments["operationId"] = operationId;
+    String uploadId = _addProgressCallback(onProgress);
+    arguments["uploadId"] = uploadId;
     final result = await _channel.invokeMethod<T>(method, arguments);
-    _removeProgressCallback(operationId);
+    _removeProgressCallback(uploadId);
     return result;
   }
+}
+
+class UploaderEvent {
+  /// Adds optional parameters here if needed
+  final Object? data;
+
+  /// The [LiveStreamingEventType]
+  final UploaderEventType type;
+
+  UploaderEvent({required this.type, this.data});
+}
+
+enum UploaderEventType {
+  /// The upload progress has changed.
+  progressChanged
 }
