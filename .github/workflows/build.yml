@@ -2,7 +2,21 @@ name: Build
 on: [ push ]
 
 jobs:
+  setup:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+    steps:
+      - name: Setup Flutter
+        id: flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
   build_ios:
+    needs: setup
     runs-on: macos-latest
     defaults:
       run:
@@ -14,12 +28,12 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Install dependencies
-        run: flutter pub get
+          cache: true
       - name: Build iOS application
         run: flutter build ios --no-codesign
 
   build_android:
+    needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -31,12 +45,12 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Install dependencies
-        run: flutter pub get
+          cache: true
       - name: Build Android application
         run: flutter build apk
 
   build_web:
+    needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -48,8 +62,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Install dependencies
-        run: flutter pub get
+          cache: true
       - name: Build Web application
         run: flutter build web
 
@@ -57,14 +70,13 @@ jobs:
     needs: [ build_web, build_android, build_ios ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Flutter
         id: flutter
-        uses: DanTup/gh-actions/setup-flutter@master
+        uses: subosito/flutter-action@v2
         with:
-          channel: 2.5.3
-      - name: Install dependencies
-        run: flutter pub get
+          channel: 'stable'
+          cache: true
       - name: Run tests
         run: flutter test
 
@@ -78,6 +90,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
       - name: Install dependencies
         run: flutter pub get
       - name: Flutter analyze
@@ -93,5 +106,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
       - name: test flutter pub publish --dry-run
         run: flutter pub publish --dry-run
