@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
               child: Column(
                 children: [
                   TextButton(
-                    child: Text('SET API KEY'),
+                    child: const Text('SET API KEY'),
                     onPressed: () => ApiVideoUploader.setApiKey('FOOBAR'),
                   ),
                   const SizedBox(
