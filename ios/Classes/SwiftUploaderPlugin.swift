@@ -8,17 +8,17 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
     private static var channel: FlutterMethodChannel? = nil
     private static var eventChannel: FlutterEventChannel? = nil
     private var eventSink: FlutterEventSink?
-    
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         channel = FlutterMethodChannel(name: "video.api.uploader", binaryMessenger: registrar.messenger())
         eventChannel = FlutterEventChannel(name: "video.api.uploader/events", binaryMessenger: registrar.messenger())
-        
+
         let instance = SwiftUploaderPlugin()
         eventChannel?.setStreamHandler(instance)
         registrar.addMethodCallDelegate(instance, channel: channel!)
         try? ApiVideoUploader.setSdkName(name: "flutter-uploader", version: "1.0.0")
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "setEnvironment":
@@ -34,7 +34,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                let apiKey = args["apiKey"] as? String {
                 ApiVideoUploader.apiKey = apiKey
             } else {
-                ApiVideoUploader.apiKey = nil
+                result(FlutterError.init(code: "missing_api_key", message: "API key is missing", details: nil))
             }
             break
         case "setChunkSize":
@@ -125,7 +125,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                         result(FlutterError.init(code: "unknown_upload_session", message: "Unknown upload session", details: nil))
                     }
                 }
-                
+
             } else {
                 result(FlutterError.init(code: "missing_file_path", message: "File path is missing", details: nil))
             }
@@ -148,7 +148,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                         result(FlutterError.init(code: "unknown_upload_session", message: "Unknown upload session", details: nil))
                     }
                 }
-                
+
             } else {
                 result(FlutterError.init(code: "missing_file_path", message: "File path is missing", details: nil))
             }
@@ -158,7 +158,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             break
         }
     }
-    
+
     private func manageResult(video: Video?, optionalError: Error?, result: @escaping FlutterResult) {
         if let video = video {
             let encodeResult = CodableHelper.encode(video)
@@ -184,11 +184,11 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             }
         }
     }
-    
+
     private func manageProgress(uploadId: String, progress: Progress) {
         eventSink?(["type": "progressChanged", "uploadId": uploadId, "bytesSent": progress.completedUnitCount, "totalBytes": progress.totalUnitCount])
     }
-    
+
     private func uploadWithUploadToken(token: String, filePath: String, uploadId: String, result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
         do {
@@ -201,7 +201,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             result(FlutterError.init(code: "upload_failed", message: error.localizedDescription, details: nil))
         }
     }
-    
+
     private func upload(videoId: String, filePath: String, uploadId: String, result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
         do {
@@ -214,7 +214,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             result(FlutterError.init(code: "upload_failed", message: error.localizedDescription, details: nil))
         }
     }
-    
+
     private func uploadPart(session: ProgressiveUploadSessionProtocol, filePath: String, uploadId: String, result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
         session.uploadPart(file: url, onProgressReady:  { progress in
@@ -223,7 +223,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             self.manageResult(video: video, optionalError: error, result: result)
         }
     }
-    
+
     private func uploadLastPart(session: ProgressiveUploadSessionProtocol, filePath: String, uploadId: String, result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
         session.uploadLastPart(file: url, onProgressReady:  { progress in
