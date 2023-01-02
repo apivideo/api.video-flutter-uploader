@@ -47,6 +47,12 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
     }
   }
 
+  /// Sets the [timeout] in milliseconds.
+  @override
+  void setTimeout(int timeout) {
+    _channel.invokeMethod('setTimeout', <String, dynamic>{'timeout': timeout});
+  }
+
   /// Sets Application name.
   @override
   void setApplicationName(String name, String version) {

@@ -21,31 +21,20 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "setApplicationName":
-              if let args = call.arguments as? Dictionary<String, Any>,
-                 let name = args["name"] as? String,
-                 let version = args["version"] as? String {
-                  do {
-                      try ApiVideoUploader.setApplicationName(name: name, version: version)
-                  } catch {
-                      result(FlutterError.init(code: "failed_to_set_application_name", message: "Failed to set Application name", details: error.localizedDescription))
-                  }
-              }
-              break
-        case "setApiKey":
-            if let args = call.arguments as? Dictionary<String, Any>,
-               let apiKey = args["apiKey"] as? String {
-                ApiVideoUploader.apiKey = apiKey
-            } else {
-                ApiVideoUploader.apiKey = nil
-            }
-            break
         case "setEnvironment":
             if let args = call.arguments as? Dictionary<String, Any>,
                let environment = args["environment"] as? String {
                 ApiVideoUploader.basePath = environment
             } else {
                 result(FlutterError.init(code: "missing_environment", message: "environment is missing", details: nil))
+            }
+            break
+        case "setApiKey":
+            if let args = call.arguments as? Dictionary<String, Any>,
+               let apiKey = args["apiKey"] as? String {
+                ApiVideoUploader.apiKey = apiKey
+            } else {
+                ApiVideoUploader.apiKey = nil
             }
             break
         case "setChunkSize":
@@ -61,6 +50,25 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                 result(FlutterError.init(code: "missing_chunk_size", message: "Chunk size is missing", details: nil))
             }
             break
+        case "setTimeout":
+            if let args = call.arguments as? Dictionary<String, Any>,
+               let timeout = args["timeout"] as? Int {
+                ApiVideoUploader.timeout = Double(timeout) / 1000
+            } else {
+                result(FlutterError.init(code: "missing_timeout", message: "Timeout is missing", details: nil))
+            }
+            break
+        case "setApplicationName":
+              if let args = call.arguments as? Dictionary<String, Any>,
+                 let name = args["name"] as? String,
+                 let version = args["version"] as? String {
+                  do {
+                      try ApiVideoUploader.setApplicationName(name: name, version: version)
+                  } catch {
+                      result(FlutterError.init(code: "failed_to_set_application_name", message: "Failed to set Application name", details: error.localizedDescription))
+                  }
+              }
+              break
         case "uploadWithUploadToken":
             if let args = call.arguments as? Dictionary<String, Any>,
                let token = args["token"] as? String,

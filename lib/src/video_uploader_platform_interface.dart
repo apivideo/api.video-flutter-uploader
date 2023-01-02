@@ -39,6 +39,10 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
     throw UnimplementedError('setApplicationName() has not been implemented.');
   }
 
+  void setTimeout(int timeout) {
+    throw UnimplementedError('setTimeout() has not been implemented.');
+  }
+
   Future<String> uploadWithUploadToken(
     String token,
     String filePath,

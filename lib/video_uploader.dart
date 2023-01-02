@@ -43,6 +43,11 @@ class ApiVideoUploader {
     return _uploaderPlatform.setApplicationName(name, version);
   }
 
+  /// Sets the request [timeout] in milliseconds.
+  static void setTimeout(int timeout) {
+    return _uploaderPlatform.setTimeout(timeout);
+  }
+
   /// Uploads [filePath] with an upload [token].
   ///
   /// Get upload progression with [onProgress].

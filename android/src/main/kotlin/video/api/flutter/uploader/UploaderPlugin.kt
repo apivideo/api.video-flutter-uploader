@@ -53,6 +53,43 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "setEnvironment" -> {
+                call.argument<String>("environment")?.let {
+                    videosApi.apiClient.basePath = it
+                } ?: result.error("missing_environment", "Environment is missing", null)
+            }
+            "setApiKey" -> {
+                val apiKey = call.argument<String>("apiKey")
+                val chunkSize = videosApi.apiClient.uploadChunkSize
+                val timeout = videosApi.apiClient.readTimeout
+
+                videosApi = VideosApi(apiKey, videosApi.apiClient.basePath).apply {
+                    apiClient.setSdkName("flutter-uploader", "1.0.0")
+                    apiClient.uploadChunkSize = chunkSize
+                    apiClient.readTimeout = timeout
+                    apiClient.writeTimeout = timeout
+                }
+            }
+            "setChunkSize" -> {
+                call.argument<Int>("size")?.let { chunkSize ->
+                    try {
+                        videosApi.apiClient.uploadChunkSize = chunkSize.toLong()
+                        result.success(videosApi.apiClient.uploadChunkSize)
+                    } catch (e: Exception) {
+                        result.error(
+                            "failed_to_set_chunk_size",
+                            "Failed to set chunk size",
+                            e.message
+                        )
+                    }
+                } ?: result.error("missing_chunk_size", "Chunk size is missing", null)
+            }
+            "setTimeout" -> {
+                call.argument<Int>("timeout")?.let { timeout ->
+                    videosApi.apiClient.writeTimeout = timeout // ms
+                    videosApi.apiClient.readTimeout = timeout // ms
+                } ?: result.error("missing_timeout", "Timeout is missing", null)
+            }
             "setApplicationName" -> {
                 val name = call.argument<String>("name")
                 val version = call.argument<String>("version")
@@ -66,34 +103,6 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                         null
                     )
                 }
-            }
-            "setApiKey" -> {
-                val apiKey = call.argument<String>("apiKey")
-                val chunkSize = videosApi.apiClient.uploadChunkSize
-
-                videosApi = VideosApi(apiKey, videosApi.apiClient.basePath).apply {
-                    apiClient.setSdkName("flutter-uploader", "1.0.0")
-                    apiClient.uploadChunkSize = chunkSize
-                }
-            }
-            "setEnvironment" -> {
-                call.argument<String>("environment")?.let {
-                    videosApi.apiClient.basePath = it
-                } ?: result.error("missing_environment", "Environment is missing", null)
-            }
-            "setChunkSize" -> {
-                call.argument<Int>("size")?.let {
-                    try {
-                        videosApi.apiClient.uploadChunkSize = it.toLong()
-                        result.success(videosApi.apiClient.uploadChunkSize)
-                    } catch (e: Exception) {
-                        result.error(
-                            "failed_to_set_chunk_size",
-                            "Failed to set chunk size",
-                            e.message
-                        )
-                    }
-                } ?: result.error("missing_chunk_size", "Chunk size is missing", null)
             }
             "uploadWithUploadToken" -> {
                 val token = call.argument<String>("token")
