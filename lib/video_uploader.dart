@@ -38,7 +38,7 @@ class ApiVideoUploader {
     return _uploaderPlatform.setChunkSize(size);
   }
 
-  /// Sets Application name.
+  /// Sets Application [name] and [version].
   static void setApplicationName(String name, String version) {
     return _uploaderPlatform.setApplicationName(name, version);
   }
