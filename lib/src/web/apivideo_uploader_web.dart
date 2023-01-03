@@ -8,7 +8,6 @@ import '../../video_uploader.dart';
 import '../video_uploader_platform_interface.dart';
 import 'js_controller.dart';
 
-
 class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   late String _apiKey;
 
