@@ -15,3 +15,7 @@ external Future<String> jsUploadWithApiKey(
   String apiKey,
   String videoId,
 );
+@JS('progressiveUploadWithUploadToken')
+external Future<String> jsProgressiveUploadWithToken(
+  String filePath,
+);

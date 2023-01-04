@@ -8,7 +8,6 @@ import '../../video_uploader.dart';
 import '../video_uploader_platform_interface.dart';
 import 'js_controller.dart';
 
-
 class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   late String _apiKey;
 
@@ -69,13 +68,122 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         return JSON.stringify(jsonObject);
       };
     ''';
-    return await useJsScript(
+    return await useJsScript<String>(
       onProgress: onProgress,
       jsMethod: () => jsUploadWithApiKey(filePath, _apiKey, videoId),
       scriptContent: script,
       scriptId: 'uploadWithApiKeyScript',
     );
   }
+
+  @override
+  void createProgressiveUploadWithUploadTokenSession(String token) {
+    if (document.querySelector('#progressiveUploadTokenScript') == null) {
+      final ScriptElement script = ScriptElement()
+        ..innerText = '''
+          window.progressiveUploaderToken = new ProgressiveUploader({
+            uploadToken: "$token",
+          });
+        '''
+        ..id = 'progressiveUploadTokenScript';
+      document.body?.insertAdjacentElement('beforeend', script);
+    }
+  }
+
+  @override
+  Future<String> uploadWithUploadTokenPart(String token, String filePath,
+      [OnProgress? onProgress]) async {
+    final String script = '''
+      window.progressiveUploadWithUploadToken = async function(filePath) {
+        var blob = await fetch(filePath)
+          .then(r => r.blob());
+        if (onProgress != null) {
+          window.progressiveUploaderToken.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+        }
+        await window.progressiveUploaderToken.uploadPart(blob);
+        return 'DONE';
+      }
+    ''';
+    return await useJsScript<void>(
+      onProgress: onProgress,
+      jsMethod: () => jsProgressiveUploadWithToken(filePath),
+      scriptContent: script,
+      scriptId: 'progressiveUploadWithTokenScript',
+    );
+  }
+
+  @override
+  Future<String> uploadWithUploadTokenLastPart(String token, String filePath,
+      [OnProgress? onProgress]) async {
+    final String script = '''
+      window.progressiveUploadWithUploadToken = async function(filePath) {
+        var blob = await fetch(filePath)
+          .then(r => r.blob());
+        if (onProgress != null) {
+          window.progressiveUploaderToken.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+        }
+        var jsonObject = await window.progressiveUploaderToken.uploadLastPart(blob);
+        return JSON.stringify(jsonObject);
+      }
+    ''';
+    return await useJsScript<String>(
+      onProgress: onProgress,
+      jsMethod: () => jsProgressiveUploadWithToken(filePath),
+      scriptContent: script,
+      scriptId: 'progressiveUploadWithTokenScript',
+    );
+  }
+
+  // @override
+  // Future<String> uploadPart(String videoId, String filePath,
+  //     [OnProgress? onProgress]) async {
+  //   final String script = '''
+  //     window.progressiveUploadWithUploadToken = async function(filePath, token) {
+  //       var blob = await fetch(filePath)
+  //         .then(r => r.blob());
+  //       var progressiveUploader = new ProgressiveUploader({
+  //         uploadToken: token,
+  //       });
+  //       if (onProgress != null) {
+  //         progressiveUploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+  //       }
+  //       await progressiveUploader.uploadPart(blob);
+  //     }
+  //   ''';
+  //   return await useJsScript<void>(
+  //     onProgress: onProgress,
+  //     jsMethod: () =>
+  //         jsProgressiveUploadWithToken(filePath, _progressiveUploadToken),
+  //     scriptContent: script,
+  //     scriptId: 'progressiveUploadWithTokenScript',
+  //   );
+  // }
+
+  // @override
+  // Future<String> uploadLastPart(String videoId, String filePath,
+  //     [OnProgress? onProgress]) async {
+  //   final String script = '''
+  //     window.progressiveUploadWithUploadToken = async function(filePath, token) {
+  //       var blob = await fetch(filePath)
+  //         .then(r => r.blob());
+  //       var progressiveUploader = new ProgressiveUploader({
+  //         uploadToken: token,
+  //       });
+  //       if (onProgress != null) {
+  //         progressiveUploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+  //       }
+  //       var jsonObject = await progressiveUploader.uploadLastPart(blob);
+  //       return JSON.stringify(jsonObject);
+  //     }
+  //   ''';
+  //   return await useJsScript<String>(
+  //     onProgress: onProgress,
+  //     jsMethod: () =>
+  //         jsProgressiveUploadWithToken(filePath, _progressiveUploadToken),
+  //     scriptContent: script,
+  //     scriptId: 'progressiveUploadWithTokenScript',
+  //   );
+  // }
 
   dynamic useJsScript<T>({
     OnProgress? onProgress,

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 import 'src/types/environment.dart';
 import 'src/types/video.dart';
 import 'src/video_uploader_platform_interface.dart';
@@ -105,7 +107,12 @@ class ProgressiveUploadWithUploadTokenSession {
   /// Uploads a part of a large video file.
   ///
   /// Get upload progression with [onProgress].
-  Future<Video> uploadPart(String filePath, [OnProgress? onProgress]) async {
+  Future<dynamic> uploadPart(String filePath, [OnProgress? onProgress]) async {
+    if (kIsWeb) {
+      await _uploaderPlatform.uploadWithUploadTokenPart(
+          token, filePath, onProgress);
+      return;
+    }
     return Video.fromJson(jsonDecode(await _uploaderPlatform
         .uploadWithUploadTokenPart(token, filePath, onProgress)));
   }
