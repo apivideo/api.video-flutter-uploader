@@ -131,7 +131,8 @@ void main() {
 
     // Create session
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "createProgressiveUploadWithUploadTokenSession");
+      expect(
+          methodCall.method, "createProgressiveUploadWithUploadTokenSession");
       expect(methodCall.arguments["token"], token);
       return;
     });

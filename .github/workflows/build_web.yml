@@ -1,0 +1,13 @@
+name: Build web
+
+on:
+  push:
+    paths:
+      - '**.dart'
+      - '**.yaml'
+
+jobs:
+  build_web:
+    uses: apivideo/.github/.github/workflows/flutter_build_web.yml@main
+    with:
+      cache: true

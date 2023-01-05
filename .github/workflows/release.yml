@@ -3,7 +3,14 @@ on:
   release:
     types: [ published ]
 jobs:
+  build_ios:
+    uses: apivideo/.github/.github/workflows/flutter_build_ios.yml@main
+  build_android:
+    uses: apivideo/.github/.github/workflows/flutter_build_android.yml@main
+  build_web:
+    uses: apivideo/.github/.github/workflows/flutter_build_web.yml@main
   publish:
+    needs: [ build_ios, build_android, build_web ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
