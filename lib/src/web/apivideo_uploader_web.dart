@@ -10,9 +10,21 @@ import 'js_controller.dart';
 
 class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   late String _apiKey;
+  int _chunkSize = 50;
 
   static void registerWith(Registrar registrar) {
     ApiVideoUploaderPlatform.instance = ApiVideoUploaderPlugin();
+  }
+
+  @override
+  void setApiKey(String apiKey) => _apiKey = apiKey;
+
+  @override
+  void setChunkSize(int size) {
+    if (size < 5 || size > 128) {
+      throw Exception('Chunk size must be between 5MB and 128MB');
+    }
+    _chunkSize = size;
   }
 
   @override
@@ -30,6 +42,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             file: blob,
             uploadToken: token,
             videoName: fileName,
+            chunkSize: 1024*1024*$_chunkSize,
         });
         if (onProgress != null) {
           uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
@@ -47,9 +60,6 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
-  void setApiKey(String apiKey) => _apiKey = apiKey;
-
-  @override
   Future<String> upload(String videoId, String filePath,
       [OnProgress? onProgress]) async {
     final String script = '''
@@ -60,6 +70,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             file: blob,
             apiKey,
             videoId,
+            chunkSize: 1024*1024*$_chunkSize,
         });
         if (onProgress != null) {
           uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
