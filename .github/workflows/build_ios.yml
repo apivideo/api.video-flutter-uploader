@@ -9,6 +9,7 @@ on:
 
 jobs:
   build_ios:
+    name: Build iOS
     uses: apivideo/.github/.github/workflows/flutter_build_ios.yml@main
     with:
       cache: true

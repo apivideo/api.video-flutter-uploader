@@ -9,6 +9,7 @@ on:
 
 jobs:
   build_android:
+    name: Build Android
     uses: apivideo/.github/.github/workflows/flutter_build_android.yml@main
     with:
       cache: true

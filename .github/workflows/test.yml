@@ -4,6 +4,7 @@ on: [ push ]
 
 jobs:
   run_tests:
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,6 +21,7 @@ jobs:
         run: flutter test
 
   analyze_code:
+    name: Analyze code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,6 +38,7 @@ jobs:
         run: flutter analyze
 
   calculate_score:
+    name: Calculate score
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -53,7 +56,8 @@ jobs:
       - name: Calculate pub points
         run: flutter pub pub global run pana  --exit-code-threshold 0 .
 
-  test_publish:
+  test_publishing:
+    name: Test publishing
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
