@@ -20,12 +20,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   void setApiKey(String apiKey) => _apiKey = apiKey;
 
   @override
-  void setChunkSize(int size) {
-    if (size < 5 || size > 128) {
-      throw Exception('Chunk size must be between 5MB and 128MB');
-    }
-    _chunkSize = size;
-  }
+  void setChunkSize(int size) => _chunkSize = size;
 
   @override
   Future<String> uploadWithUploadToken(
@@ -70,7 +65,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             file: blob,
             apiKey,
             videoId,
-            chunkSize: 1024*1024*$_chunkSize,
+            chunkSize: $_chunkSize,
         });
         if (onProgress != null) {
           uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
