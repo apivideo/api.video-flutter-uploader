@@ -1,6 +1,7 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:html';
-import 'dart:js_util';
 import 'dart:js' as js;
+import 'dart:js_util';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
@@ -11,6 +12,7 @@ import 'js_controller.dart';
 class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   late String _apiKey;
   int _chunkSize = 50;
+  ApplicationName? _applicationName;
 
   static void registerWith(Registrar registrar) {
     ApiVideoUploaderPlatform.instance = ApiVideoUploaderPlugin();
@@ -18,6 +20,10 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
 
   @override
   void setApiKey(String apiKey) => _apiKey = apiKey;
+
+  @override
+  void setApplicationName(String name, String version) =>
+      _applicationName = ApplicationName(name: name, version: version);
 
   @override
   void setChunkSize(int size) => _chunkSize = size;
@@ -38,7 +44,10 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             uploadToken: token,
             videoName: fileName,
             chunkSize: 1024*1024*$_chunkSize,
-            origin: { sdk: { name: 'flutter-uploader', version: '1.0.0', }, },
+            origin: {
+              sdk: { name: 'flutter-uploader', version: '1.0.0', },
+              ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
+            },
         });
         if (onProgress != null) {
           uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
@@ -67,7 +76,10 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             apiKey,
             videoId,
             chunkSize: $_chunkSize,
-            origin: { sdk: { name: 'flutter-uploader', version: '1.0.0', }, },
+            origin: {
+              sdk: { name: 'flutter-uploader', version: '1.0.0', },
+              ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
+            },
         });
         if (onProgress != null) {
           uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
@@ -91,7 +103,10 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         ..innerText = '''
           window.progressiveUploaderToken = new ProgressiveUploader({
             uploadToken: "$token",
-            origin: { sdk: { name: 'flutter-uploader', version: '1.0.0', }, },
+            origin: {
+              sdk: { name: 'flutter-uploader', version: '1.0.0', },
+              ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
+            },
           });
         '''
         ..id = 'progressiveUploadTokenScript';
@@ -167,4 +182,13 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
     document.body!.querySelector('#$scriptId')!.remove();
     return res;
   }
+}
+
+class ApplicationName {
+  ApplicationName({
+    required this.name,
+    required this.version,
+  });
+  String name;
+  String version;
 }
