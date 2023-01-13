@@ -38,6 +38,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             uploadToken: token,
             videoName: fileName,
             chunkSize: 1024*1024*$_chunkSize,
+            origin: { sdk: { name: 'flutter-uploader', version: '1.0.0', }, },
         });
         if (onProgress != null) {
           uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
@@ -66,6 +67,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             apiKey,
             videoId,
             chunkSize: $_chunkSize,
+            origin: { sdk: { name: 'flutter-uploader', version: '1.0.0', }, },
         });
         if (onProgress != null) {
           uploader.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
@@ -89,6 +91,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         ..innerText = '''
           window.progressiveUploaderToken = new ProgressiveUploader({
             uploadToken: "$token",
+            origin: { sdk: { name: 'flutter-uploader', version: '1.0.0', }, },
           });
         '''
         ..id = 'progressiveUploadTokenScript';
