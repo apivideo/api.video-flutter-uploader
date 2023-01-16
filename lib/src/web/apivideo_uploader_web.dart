@@ -98,20 +98,18 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
 
   @override
   void createProgressiveUploadWithUploadTokenSession(String token) {
-    if (document.querySelector('#progressiveUploadTokenScript') == null) {
-      final ScriptElement script = ScriptElement()
-        ..innerText = '''
-          window.progressiveUploaderToken = new ProgressiveUploader({
-            uploadToken: "$token",
-            origin: {
-              sdk: { name: 'flutter-uploader', version: '1.0.0', },
-              ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
-            },
-          });
-        '''
-        ..id = 'progressiveUploadTokenScript';
-      document.body?.insertAdjacentElement('beforeend', script);
-    }
+    final ScriptElement script = ScriptElement()
+      ..innerText = '''
+        window.progressiveUploaderToken = new ProgressiveUploader({
+          uploadToken: "$token",
+          origin: {
+            sdk: { name: 'flutter-uploader', version: '1.0.0', },
+            ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
+          },
+        });
+      '''
+      ..id = 'progressiveUploadTokenScript';
+    document.body?.insertAdjacentElement('beforeend', script);
   }
 
   @override
@@ -155,6 +153,67 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
       jsMethod: () => jsProgressiveUploadWithToken(filePath),
       scriptContent: script,
       scriptId: 'progressiveUploadWithTokenScript',
+    );
+  }
+
+  @override
+  void createProgressiveUploadSession(String videoId) {
+    final ScriptElement script = ScriptElement()
+      ..innerText = '''
+        window.progressiveUploaderAK = new ProgressiveUploader({
+          videoId: "$videoId",
+          apiKey: "$_apiKey",
+          origin: {
+            sdk: { name: 'flutter-uploader', version: '1.0.0', },
+            ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
+          },
+        });
+      '''
+      ..id = 'progressiveUploadAKScript';
+    document.body?.insertAdjacentElement('beforeend', script);
+  }
+
+  @override
+  Future<String> uploadPart(String videoId, String filePath,
+      [OnProgress? onProgress]) async {
+    final String script = '''
+      window.progressiveUploadWithApiKey = async function(filePath) {
+        var blob = await fetch(filePath)
+          .then(r => r.blob());
+        if (onProgress != null) {
+          window.progressiveUploaderAK.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+        }
+        await window.progressiveUploaderAK.uploadPart(blob);
+        return '';
+      }
+    ''';
+    return await useJsScript<String>(
+      onProgress: onProgress,
+      jsMethod: () => jsProgressiveUploadWithApiKey(filePath),
+      scriptContent: script,
+      scriptId: 'progressiveUploadWithApiKey',
+    );
+  }
+
+  @override
+  Future<String> uploadLastPart(String videoId, String filePath,
+      [OnProgress? onProgress]) async {
+    final String script = '''
+      window.progressiveUploadWithApiKey = async function(filePath) {
+        var blob = await fetch(filePath)
+          .then(r => r.blob());
+        if (onProgress != null) {
+          window.progressiveUploaderAK.onProgress((e) => onProgress(e.uploadedBytes, e.totalBytes));
+        }
+        var jsonObject = await window.progressiveUploaderAK.uploadLastPart(blob);
+        return JSON.stringify(jsonObject);
+      }
+    ''';
+    return await useJsScript<String>(
+      onProgress: onProgress,
+      jsMethod: () => jsProgressiveUploadWithApiKey(filePath),
+      scriptContent: script,
+      scriptId: 'progressiveUploadWithApiKey',
     );
   }
 

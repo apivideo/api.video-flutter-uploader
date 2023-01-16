@@ -19,3 +19,7 @@ external Future<String> jsUploadWithApiKey(
 external Future<String> jsProgressiveUploadWithToken(
   String filePath,
 );
+@JS('progressiveUploadWithApiKey')
+external Future<String> jsProgressiveUploadWithApiKey(
+  String filePath,
+);

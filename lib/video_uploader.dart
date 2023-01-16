@@ -144,7 +144,11 @@ class ProgressiveUploadSession {
   /// You have to set the API key with [setApiKey] before.
   ///
   /// Get upload progression with [onProgress].
-  Future<Video> uploadPart(String filePath, [OnProgress? onProgress]) async {
+  Future<dynamic> uploadPart(String filePath, [OnProgress? onProgress]) async {
+    if (kIsWeb) {
+      await _uploaderPlatform.uploadPart(videoId, filePath, onProgress);
+      return;
+    }
     return Video.fromJson(jsonDecode(
         await _uploaderPlatform.uploadPart(videoId, filePath, onProgress)));
   }
