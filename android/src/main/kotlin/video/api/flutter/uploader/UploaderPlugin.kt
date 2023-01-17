@@ -27,9 +27,7 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
     private val json = JSON()
     private val executor = Executors.newSingleThreadExecutor()
 
-    private var videosApi = VideosApi().apply {
-        apiClient.setSdkName("flutter-uploader", "1.0.0")
-    }
+    private var videosApi = VideosApi()
 
     private val progressiveUploadSessions =
         mutableMapOf<String, IProgressiveUploadSession>()
@@ -53,6 +51,16 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "setSdkNameVersion" -> {
+                try {
+                    val name = call.argument<String>("name")!!
+                    val version = call.argument<String>("version")!!
+                    videosApi.apiClient.setSdkName(name, version)
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("missing_parameters", e.message, null)
+                }
+            }
             "setEnvironment" -> {
                 call.argument<String>("environment")?.let {
                     videosApi.apiClient.basePath = it
@@ -64,7 +72,6 @@ class UploaderPlugin : FlutterPlugin, MethodCallHandler {
                     val timeout = videosApi.apiClient.readTimeout
 
                     videosApi = VideosApi(apiKey, videosApi.apiClient.basePath).apply {
-                        apiClient.setSdkName("flutter-uploader", "1.0.0")
                         apiClient.uploadChunkSize = chunkSize
                         apiClient.readTimeout = timeout
                         apiClient.writeTimeout = timeout

@@ -12,7 +12,8 @@ export 'types.dart';
 class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// The communication channel
   final MethodChannel _channel = const MethodChannel('video.api.uploader');
-  late final _UploadChannel _uploadChannel = _UploadChannel(_channel);
+  late final _UploadChannel _uploadChannel =
+      _UploadChannel(_channel, sdkVersion);
 
   static void registerWith() {
     ApiVideoUploaderPlatform.instance = ApiVideoMobileUploaderPlugin();
@@ -174,16 +175,26 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
 class _UploadChannel {
   /// The communication channel
   final MethodChannel _channel;
+  final String _sdkVersion;
 
   /// The uploader events channel
   final eventChannel = const EventChannel('video.api.uploader/events');
 
-  _UploadChannel(this._channel) {
+  _UploadChannel(this._channel, this._sdkVersion) {
     eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
   }
 
   /// The map between id and progress callback
   final _onProgressMap = Map<String, OnProgress?>();
+
+  /// Sets SDK [version] and name
+  ///
+  /// This method must be called before any other method.
+  /// It is meant to be internal.
+  Future<void> _setSdkVersion(String version) async {
+    return _channel.invokeMethod('setSdkNameVersion',
+        <String, dynamic>{'version': version, 'name': 'flutter-uploader'});
+  }
 
   /// Registers method call handler to intercept messages from native parts
   void _onEvent(dynamic event) {
@@ -219,6 +230,8 @@ class _UploadChannel {
   /// [arguments].
   Future<T?> invokeMethod<T>(String method,
       [dynamic arguments, OnProgress? onProgress]) async {
+    await _setSdkVersion(_sdkVersion);
+
     String uploadId = _addProgressCallback(onProgress);
     arguments["uploadId"] = uploadId;
     final result = await _channel.invokeMethod<T>(method, arguments);

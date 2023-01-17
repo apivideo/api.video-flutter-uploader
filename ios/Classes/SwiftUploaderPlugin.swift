@@ -15,11 +15,24 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
         let instance = SwiftUploaderPlugin()
         eventChannel?.setStreamHandler(instance)
         registrar.addMethodCallDelegate(instance, channel: channel!)
-        try? ApiVideoUploader.setSdkName(name: "flutter-uploader", version: "1.0.0")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
+        case "setSdkNameVersion":
+            if let args = call.arguments as? [String: Any],
+               let name = args["name"] as? String,
+               let version = args["version"] as? String
+            {
+                do {
+                    try ApiVideoUploader.setSdkName(name: name, version: version)
+                    result(nil)
+                } catch {
+                    result(FlutterError(code: "failed_to_set_sdk_name", message: "Failed to set SDK name and version", details: error.localizedDescription))
+                }
+            } else {
+                result(FlutterError(code: "missing_parameters", message: "name or version is missing", details: nil))
+            }
         case "setEnvironment":
             if let args = call.arguments as? [String: Any],
                let environment = args["environment"] as? String
