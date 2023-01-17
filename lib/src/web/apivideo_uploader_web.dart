@@ -45,7 +45,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             videoName: fileName,
             chunkSize: 1024*1024*$_chunkSize,
             origin: {
-              sdk: { name: 'flutter-uploader', version: '1.0.0', },
+              sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
               ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
             },
         });
@@ -77,7 +77,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             videoId,
             chunkSize: $_chunkSize,
             origin: {
-              sdk: { name: 'flutter-uploader', version: '1.0.0', },
+              sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
               ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
             },
         });
@@ -103,7 +103,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         window.progressiveUploaderToken = new ProgressiveUploader({
           uploadToken: "$token",
           origin: {
-            sdk: { name: 'flutter-uploader', version: '1.0.0', },
+            sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
             ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
           },
         });
@@ -164,7 +164,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
           videoId: "$videoId",
           apiKey: "$_apiKey",
           origin: {
-            sdk: { name: 'flutter-uploader', version: '1.0.0', },
+            sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
             ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
           },
         });
