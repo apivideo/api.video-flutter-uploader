@@ -8,7 +8,7 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  final String sdkVersion = '1.0.0';
+  final String sdkVersion = '1.1.0';
 
   static ApiVideoUploaderPlatform _instance = _PlatformImplementation();
 

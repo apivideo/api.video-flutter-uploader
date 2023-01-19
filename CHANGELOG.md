@@ -1,6 +1,9 @@
 # Changelog
 All changes to this project will be documented in this file.
 
+## [1.1.0] - 2022-07-05
+- Add web support
+
 ## [1.0.0] - 2022-07-05
 - Add API to set application name
 - Use SDK name
