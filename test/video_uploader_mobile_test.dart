@@ -1,15 +1,15 @@
 import 'dart:convert';
-import 'package:video_uploader/src/types/environment.dart';
-import 'package:video_uploader/src/types/video.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:video_uploader/video_uploader.dart';
+import 'package:video_uploader/src/video_uploader_platform_interface.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   /// The mocked method channel
-  const MethodChannel channel = const MethodChannel('video.api/uploader');
+  const MethodChannel channel = const MethodChannel('video.api.uploader');
+  ApiVideoUploaderPlatform.instance = ApiVideoMobileUploaderPlugin();
 
   test('setEnvironment', () async {
     final environment = Environment.sandbox;
@@ -24,17 +24,6 @@ void main() {
 
   test('setApiKey', () async {
     final apkiKey = "abcde";
-    channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "setApiKey");
-      expect(methodCall.arguments["apiKey"], apkiKey);
-      return;
-    });
-    ApiVideoUploader.setApiKey(apkiKey);
-    channel.setMockMethodCallHandler(null);
-  });
-
-  test('setNullApiKey', () async {
-    String? apkiKey;
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       expect(methodCall.method, "setApiKey");
       expect(methodCall.arguments["apiKey"], apkiKey);
@@ -59,11 +48,16 @@ void main() {
     final videoId = "abcde";
     final filePath = "path/to/file";
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "upload");
-      expect(null, isNot(methodCall.arguments["operationId"]));
-      expect(methodCall.arguments["videoId"], videoId);
-      expect(methodCall.arguments["filePath"], filePath);
-      return jsonEncode(Video(videoId).toJson());
+      if (methodCall.method == "setSdkNameVersion") {
+      } else if (methodCall.method == "upload") {
+        expect(methodCall.method, "upload");
+        expect(null, isNot(methodCall.arguments["uploadId"]));
+        expect(methodCall.arguments["videoId"], videoId);
+        expect(methodCall.arguments["filePath"], filePath);
+        return jsonEncode(Video(videoId).toJson());
+      } else {
+        fail("Method not expected: ${methodCall.method}");
+      }
     });
     expect((await ApiVideoUploader.upload(videoId, filePath)).videoId, videoId);
     channel.setMockMethodCallHandler(null);
@@ -74,11 +68,16 @@ void main() {
     final token = "abcde";
     final filePath = "path/to/file";
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "uploadWithUploadToken");
-      expect(null, isNot(methodCall.arguments["operationId"]));
-      expect(methodCall.arguments["token"], token);
-      expect(methodCall.arguments["filePath"], filePath);
-      return jsonEncode(Video(videoId).toJson());
+      if (methodCall.method == "setSdkNameVersion") {
+      } else if (methodCall.method == "uploadWithUploadToken") {
+        expect(methodCall.method, "uploadWithUploadToken");
+        expect(null, isNot(methodCall.arguments["uploadId"]));
+        expect(methodCall.arguments["token"], token);
+        expect(methodCall.arguments["filePath"], filePath);
+        return jsonEncode(Video(videoId).toJson());
+      } else {
+        fail("Method not expected: ${methodCall.method}");
+      }
     });
     expect(
         (await ApiVideoUploader.uploadWithUploadToken(token, filePath)).videoId,
@@ -89,8 +88,13 @@ void main() {
   test('uploadWithUploadTokenProgress', () async {
     final videoId = "abcde";
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(null, isNot(methodCall.arguments["operationId"]));
-      return jsonEncode(Video(videoId).toJson());
+      if (methodCall.method == "setSdkNameVersion") {
+      } else if (methodCall.method == "uploadWithUploadToken") {
+        expect(null, isNot(methodCall.arguments["uploadId"]));
+        return jsonEncode(Video(videoId).toJson());
+      } else {
+        fail("Method not expected: ${methodCall.method}");
+      }
     });
     expect(
         (await ApiVideoUploader.uploadWithUploadToken("abcde", "path/to/file"))
@@ -105,7 +109,7 @@ void main() {
 
     // Create session
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "createUploadSession");
+      expect(methodCall.method, "createProgressiveUploadSession");
       expect(methodCall.arguments["videoId"], videoId);
       return;
     });
@@ -114,22 +118,32 @@ void main() {
 
     // Upload part
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "uploadPart");
-      expect(null, isNot(methodCall.arguments["operationId"]));
-      expect(methodCall.arguments["videoId"], videoId);
-      expect(methodCall.arguments["filePath"], filePath);
-      return jsonEncode(Video(videoId).toJson());
+      if (methodCall.method == "setSdkNameVersion") {
+      } else if (methodCall.method == "uploadPart") {
+        expect(methodCall.method, "uploadPart");
+        expect(null, isNot(methodCall.arguments["uploadId"]));
+        expect(methodCall.arguments["videoId"], videoId);
+        expect(methodCall.arguments["filePath"], filePath);
+        return jsonEncode(Video(videoId).toJson());
+      } else {
+        fail("Method not expected: ${methodCall.method}");
+      }
     });
     expect((await session.uploadPart(filePath)).videoId, videoId);
     channel.setMockMethodCallHandler(null);
 
     // Upload last part
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "uploadLastPart");
-      expect(null, isNot(methodCall.arguments["operationId"]));
-      expect(methodCall.arguments["videoId"], videoId);
-      expect(methodCall.arguments["filePath"], filePath);
-      return jsonEncode(Video(videoId).toJson());
+      if (methodCall.method == "setSdkNameVersion") {
+      } else if (methodCall.method == "uploadLastPart") {
+        expect(methodCall.method, "uploadLastPart");
+        expect(null, isNot(methodCall.arguments["uploadId"]));
+        expect(methodCall.arguments["videoId"], videoId);
+        expect(methodCall.arguments["filePath"], filePath);
+        return jsonEncode(Video(videoId).toJson());
+      } else {
+        fail("Method not expected: ${methodCall.method}");
+      }
     });
     expect((await session.uploadLastPart(filePath)).videoId, videoId);
     channel.setMockMethodCallHandler(null);
@@ -140,9 +154,10 @@ void main() {
     final token = "abcde";
     final filePath = "path/to/file";
 
-    // Create session
+// Create session
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "createUploadWithUploadTokenSession");
+      expect(
+          methodCall.method, "createProgressiveUploadWithUploadTokenSession");
       expect(methodCall.arguments["token"], token);
       return;
     });
@@ -150,24 +165,34 @@ void main() {
         ApiVideoUploader.createProgressiveUploadWithUploadTokenSession(token);
     channel.setMockMethodCallHandler(null);
 
-    // Upload part
+// Upload part
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "uploadPart");
-      expect(null, isNot(methodCall.arguments["operationId"]));
-      expect(methodCall.arguments["token"], token);
-      expect(methodCall.arguments["filePath"], filePath);
-      return jsonEncode(Video(videoId).toJson());
+      if (methodCall.method == "setSdkNameVersion") {
+      } else if (methodCall.method == "uploadPart") {
+        expect(methodCall.method, "uploadPart");
+        expect(null, isNot(methodCall.arguments["uploadId"]));
+        expect(methodCall.arguments["token"], token);
+        expect(methodCall.arguments["filePath"], filePath);
+        return jsonEncode(Video(videoId).toJson());
+      } else {
+        fail("Method not expected: ${methodCall.method}");
+      }
     });
     expect((await session.uploadPart(filePath)).videoId, videoId);
     channel.setMockMethodCallHandler(null);
 
-    // Upload last part
+// Upload last part
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      expect(methodCall.method, "uploadLastPart");
-      expect(null, isNot(methodCall.arguments["operationId"]));
-      expect(methodCall.arguments["token"], token);
-      expect(methodCall.arguments["filePath"], filePath);
-      return jsonEncode(Video(videoId).toJson());
+      if (methodCall.method == "setSdkNameVersion") {
+      } else if (methodCall.method == "uploadLastPart") {
+        expect(methodCall.method, "uploadLastPart");
+        expect(null, isNot(methodCall.arguments["uploadId"]));
+        expect(methodCall.arguments["token"], token);
+        expect(methodCall.arguments["filePath"], filePath);
+        return jsonEncode(Video(videoId).toJson());
+      } else {
+        fail("Method not expected: ${methodCall.method}");
+      }
     });
     expect((await session.uploadLastPart(filePath)).videoId, videoId);
     channel.setMockMethodCallHandler(null);
