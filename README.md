@@ -9,9 +9,10 @@
 - [Table of contents](#table-of-contents)
 - [Project description](#project-description)
 - [Getting started](#getting-started)
-  - [Installation](#installation)
-  - [Code sample](#code-sample)
-- [Plugins](#plugins)
+    - [Installation](#installation)
+      - [For web usage](#for-web-usage)
+    - [Code sample](#code-sample)
+- [Dependencies](#dependencies)
 - [FAQ](#faq)
 - [Found this video uploader useful?](#found-this-video-uploader-useful)
 
@@ -39,6 +40,23 @@ This will add the following lines to your package's pubspec.yaml file:
 ``` yaml
 dependencies:
   video_uploader: ^1.0.0
+```
+
+#### For web usage
+
+Add the api.video TypeScript uploader script to your `web/index.html` head.
+
+```html
+  <!DOCTYPE html>
+<html>
+  <head>
+    ...
+    <script src="https://unpkg.com/@api.video/video-uploader" defer></script>
+  </head>
+  <body>
+    ...
+  </body>
+</html>
 ```
 
 ### Code sample
