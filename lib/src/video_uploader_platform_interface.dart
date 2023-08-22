@@ -8,7 +8,7 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  final String sdkVersion = '1.1.0';
+  final String sdkVersion = '1.2.0';
 
   static ApiVideoUploaderPlatform _instance = _PlatformImplementation();
 
@@ -93,6 +93,11 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
   Future<String> uploadLastPart(String videoId, String filePath,
       [OnProgress? onProgress]) {
     throw UnimplementedError('uploadLastPart() has not been implemented.');
+  }
+
+  // Cancellation
+  Future<void> cancelAll() {
+    throw UnimplementedError('cancelAll() has not been implemented.');
   }
 }
 

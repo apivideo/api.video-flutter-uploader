@@ -169,6 +169,11 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
         <String, dynamic>{'videoId': videoId, 'filePath': filePath},
         onProgress);
   }
+
+  /// Cancels all the uploads.
+  Future<void> cancelAll() async {
+    await _channel.invokeMethod('cancelAll');
+  }
 }
 
 /// A wrapper around upload calls to manage progress callback.
@@ -201,9 +206,8 @@ class _UploadChannel {
     if (event["type"] == "progressChanged") {
       final String id = event["uploadId"];
       if (_onProgressMap[id] != null) {
-        final int bytesSent = event["bytesSent"];
-        final int totalBytes = event["totalBytes"];
-        _onProgressMap[id]!(bytesSent, totalBytes);
+        final int progress = event["progress"];
+        _onProgressMap[id]!(progress);
       }
     } else {
       print("Unknown event type: ${event["type"]}");

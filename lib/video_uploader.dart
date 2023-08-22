@@ -11,7 +11,7 @@ export 'src/types.dart';
 export 'src/video_uploader_mobile_platform.dart';
 
 /// Progress indicator callback
-typedef void OnProgress(int bytesSent, int totalBytes);
+typedef void OnProgress(int progress);
 
 ApiVideoUploaderPlatform get _uploaderPlatform {
   return ApiVideoUploaderPlatform.instance;
@@ -91,6 +91,11 @@ class ApiVideoUploader {
   static ProgressiveUploadWithUploadTokenSession
       createProgressiveUploadWithUploadTokenSession(String token) {
     return ProgressiveUploadWithUploadTokenSession(token);
+  }
+
+  /// Cancels all uploads.
+  static cancelAll() {
+    return _uploaderPlatform.cancelAll();
   }
 }
 

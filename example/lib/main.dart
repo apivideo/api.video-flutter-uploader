@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:video_uploader/video_uploader.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:video_uploader/video_uploader.dart';
 
 const primaryColor = Color(0xFFFA5B30);
 const secondaryColor = Color(0xFFFFB39E);
@@ -19,10 +19,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late String _imagePath;
   final _tokenTextController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   double _progressValue = 0;
+  bool _hasUploadStarted = false;
 
   void setProgress(double value) async {
     setState(() {
@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
                   MaterialButton(
                     color: primaryColor,
                     child: const Text(
-                      "Pick Video from Gallery",
+                      "Pick Video",
                       style: TextStyle(
                           color: Colors.white70, fontWeight: FontWeight.bold),
                     ),
@@ -80,43 +80,49 @@ class _MyAppState extends State<MyApp> {
                       XFile? image = await _picker.pickVideo(source: source);
                       if (image != null) {
                         setState(() {
-                          try {
-                            _imagePath = image.path;
-                          } catch (e) {
-                            log("Failed to get video: $e");
-                          }
+                          _hasUploadStarted = true;
                         });
+                        try {
+                          var video =
+                              await ApiVideoUploader.uploadWithUploadToken(
+                                  _tokenTextController.text, image.path,
+                                  (progress) {
+                            log("Progress :$progress");
+                            setProgress(progress.toDouble() / 100);
+                          });
+                          log("Video : $video");
+                          log("Title : ${video.title}");
+                        } catch (e) {
+                          log("Failed to upload video: $e");
+                        }
                       }
                     },
                   ),
-                  MaterialButton(
-                    color: primaryColor,
-                    child: const Text(
-                      "Upload video",
-                      style: TextStyle(
-                          color: Colors.white70, fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () async {
-                      try {
-                        var video =
-                            await ApiVideoUploader.uploadWithUploadToken(
-                                _tokenTextController.text, _imagePath,
-                                (bytesSent, totalByte) {
-                          log("Progress : ${bytesSent / totalByte}");
-                          setProgress(bytesSent / totalByte);
-                        });
-                        log("Video : $video");
-                        log("Title : ${video.title}");
-                      } catch (e) {
-                        log("Failed to upload video: $e");
-                      }
-                    },
-                  ),
-                  LinearProgressIndicator(
-                    color: primaryColor,
-                    backgroundColor: secondaryColor,
-                    value: _progressValue,
-                  ),
+                  _hasUploadStarted
+                      ? LinearProgressIndicator(
+                          color: primaryColor,
+                          backgroundColor: secondaryColor,
+                          value: _progressValue,
+                        )
+                      : Container(),
+                  _hasUploadStarted
+                      ? MaterialButton(
+                          color: primaryColor,
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () async {
+                            try {
+                              await ApiVideoUploader.cancelAll();
+                            } catch (e) {
+                              log("Failed to cancel video: $e");
+                            }
+                          },
+                        )
+                      : Container(),
                 ],
               ),
             ),
