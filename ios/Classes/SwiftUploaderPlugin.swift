@@ -193,7 +193,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
     }
 
     private func manageProgress(uploadId: String, progress: Progress) {
-        eventSink?(["type": "progressChanged", "uploadId": uploadId, "bytesSent": progress.completedUnitCount, "totalBytes": progress.totalUnitCount])
+        eventSink?(["type": "progressChanged", "uploadId": uploadId, "progress": Int(progress.completedUnitCount * 100 / progress.totalUnitCount)] as [String : Any])
     }
 
     private func uploadWithUploadToken(token: String, filePath: String, uploadId: String, result: @escaping FlutterResult) {
