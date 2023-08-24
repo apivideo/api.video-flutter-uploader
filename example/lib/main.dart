@@ -85,8 +85,8 @@ class _MyAppState extends State<MyApp> {
                         try {
                           var video =
                               await ApiVideoUploader.uploadWithUploadToken(
-                                  _tokenTextController.text, image.path, null,
-                                  (progress) {
+                                  _tokenTextController.text, image.path,
+                                  onProgress: (progress) {
                             log("Progress :$progress");
                             setProgress(progress.toDouble() / 100);
                           });

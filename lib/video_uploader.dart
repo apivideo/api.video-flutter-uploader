@@ -60,11 +60,11 @@ class ApiVideoUploader {
   /// Alternatively for large file, you might want to use [ProgressiveUploadWithUploadTokenSession].
   static Future<Video> uploadWithUploadToken(
     String token,
-    String filePath, [
+    String filePath, {
     String? videoId,
     OnProgress? onProgress,
     String fileName = 'file',
-  ]) async {
+  }) async {
     return Video.fromJson(jsonDecode(
         await _uploaderPlatform.uploadWithUploadToken(
             token, filePath, fileName, videoId, onProgress)));
@@ -78,7 +78,7 @@ class ApiVideoUploader {
   ///
   /// Alternatively for large file, you might want to use [ProgressiveUploadSession].
   static Future<Video> upload(String videoId, String filePath,
-      [OnProgress? onProgress]) async {
+      {OnProgress? onProgress}) async {
     return Video.fromJson(jsonDecode(
         await _uploaderPlatform.upload(videoId, filePath, onProgress)));
   }
@@ -92,7 +92,7 @@ class ApiVideoUploader {
   /// Creates a progressive upload session with upload [token].
   static ProgressiveUploadWithUploadTokenSession
       createProgressiveUploadWithUploadTokenSession(String token,
-          [String? videoId]) {
+          {String? videoId}) {
     return ProgressiveUploadWithUploadTokenSession(token, videoId);
   }
 
@@ -122,7 +122,7 @@ class ProgressiveUploadWithUploadTokenSession {
   /// Uploads a part of a large video file.
   ///
   /// Get upload progression with [onProgress].
-  Future<dynamic> uploadPart(String filePath, [OnProgress? onProgress]) async {
+  Future<dynamic> uploadPart(String filePath, {OnProgress? onProgress}) async {
     if (kIsWeb) {
       return _uploaderPlatform.uploadWithUploadTokenPart(
           token, filePath, onProgress);
@@ -137,7 +137,7 @@ class ProgressiveUploadWithUploadTokenSession {
   ///
   /// Get upload progression with [onProgress].
   Future<Video> uploadLastPart(String filePath,
-      [OnProgress? onProgress]) async {
+      {OnProgress? onProgress}) async {
     return Video.fromJson(jsonDecode(await _uploaderPlatform
         .uploadWithUploadTokenLastPart(_sessionId, filePath, onProgress)));
   }
@@ -166,7 +166,7 @@ class ProgressiveUploadSession {
   /// You have to set the API key with [setApiKey] before.
   ///
   /// Get upload progression with [onProgress].
-  Future<dynamic> uploadPart(String filePath, [OnProgress? onProgress]) async {
+  Future<dynamic> uploadPart(String filePath, {OnProgress? onProgress}) async {
     if (kIsWeb) {
       return _uploaderPlatform.uploadPart(_sessionId, filePath, onProgress);
     }
@@ -182,7 +182,7 @@ class ProgressiveUploadSession {
   ///
   /// Get upload progression with [onProgress].
   Future<Video> uploadLastPart(String filePath,
-      [OnProgress? onProgress]) async {
+      {OnProgress? onProgress}) async {
     return Video.fromJson(jsonDecode(await _uploaderPlatform.uploadLastPart(
         _sessionId, filePath, onProgress)));
   }
