@@ -48,7 +48,8 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
   Future<String> uploadWithUploadToken(
     String token,
     String filePath,
-    String fileName, [
+    String fileName,
+    String? videoId, [
     OnProgress? onProgress,
   ]) {
     throw UnimplementedError(
@@ -63,7 +64,7 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
 
   // Progressive upload with upload token
   void createProgressiveUploadWithUploadTokenSession(
-      String sessionId, String token) {
+      String sessionId, String token, String? videoId) {
     throw UnimplementedError(
       'createProgressiveUploadSession() has not been implemented.',
     );

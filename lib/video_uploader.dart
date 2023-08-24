@@ -50,7 +50,7 @@ class ApiVideoUploader {
     return _uploaderPlatform.setTimeout(timeout);
   }
 
-  /// Uploads [filePath] with an upload [token].
+  /// Uploads [filePath] with an upload [token] and optionally [videoId].
   ///
   /// Get upload progression with [onProgress].
   ///
@@ -61,11 +61,13 @@ class ApiVideoUploader {
   static Future<Video> uploadWithUploadToken(
     String token,
     String filePath, [
+    String? videoId,
     OnProgress? onProgress,
     String fileName = 'file',
   ]) async {
-    return Video.fromJson(jsonDecode(await _uploaderPlatform
-        .uploadWithUploadToken(token, filePath, fileName, onProgress)));
+    return Video.fromJson(jsonDecode(
+        await _uploaderPlatform.uploadWithUploadToken(
+            token, filePath, fileName, videoId, onProgress)));
   }
 
   /// Uploads [filePath] to the [videoId].
@@ -89,8 +91,9 @@ class ApiVideoUploader {
 
   /// Creates a progressive upload session with upload [token].
   static ProgressiveUploadWithUploadTokenSession
-      createProgressiveUploadWithUploadTokenSession(String token) {
-    return ProgressiveUploadWithUploadTokenSession(token);
+      createProgressiveUploadWithUploadTokenSession(String token,
+          [String? videoId]) {
+    return ProgressiveUploadWithUploadTokenSession(token, videoId);
   }
 
   /// Cancels all uploads.
@@ -107,10 +110,13 @@ class ProgressiveUploadWithUploadTokenSession {
   /// The video token
   final String token;
 
+  /// The video id.
+  final String? videoId;
+
   /// Creates a progressive upload with upload [token].
-  ProgressiveUploadWithUploadTokenSession(this.token) {
+  ProgressiveUploadWithUploadTokenSession(this.token, this.videoId) {
     _uploaderPlatform.createProgressiveUploadWithUploadTokenSession(
-        _sessionId, token);
+        _sessionId, token, videoId);
   }
 
   /// Uploads a part of a large video file.

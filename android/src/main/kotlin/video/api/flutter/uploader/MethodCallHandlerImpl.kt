@@ -115,6 +115,7 @@ class MethodCallHandlerImpl(
                 val token = call.argument<String>("token")
                 val filePath = call.argument<String>("filePath")
                 val uploadId = call.argument<String>("uploadId")
+                val videoId = call.argument<String>("videoId")
                 when {
                     token == null -> {
                         result.error("missing_token", "Token is missing", null)
@@ -129,7 +130,7 @@ class MethodCallHandlerImpl(
                     }
 
                     else -> {
-                        uploadWithUploadToken(token, filePath, uploadId, result)
+                        uploadWithUploadToken(token, filePath, videoId, uploadId, result)
                     }
                 }
             }
@@ -181,6 +182,7 @@ class MethodCallHandlerImpl(
             "createProgressiveUploadWithUploadTokenSession" -> {
                 val sessionId = call.argument<String>("sessionId")
                 val token = call.argument<String>("token")
+                val videoId = call.argument<String>("videoId")
                 when {
                     sessionId == null -> {
                         result.error("missing_session_id", "Session id is missing", null)
@@ -193,7 +195,8 @@ class MethodCallHandlerImpl(
                     else -> {
                         uploaderModule.createUploadWithUploadTokenProgressiveSession(
                             sessionId,
-                            token
+                            token,
+                            videoId
                         )
                     }
                 }
@@ -310,9 +313,13 @@ class MethodCallHandlerImpl(
     }
 
     private fun uploadWithUploadToken(
-        token: String, filePath: String, uploadId: String, result: MethodChannel.Result
+        token: String,
+        filePath: String,
+        videoId: String?,
+        uploadId: String,
+        result: MethodChannel.Result
     ) {
-        uploaderModule.uploadWithUploadToken(token, filePath, null, { progress ->
+        uploaderModule.uploadWithUploadToken(token, filePath, videoId, { progress ->
             postOnProgress(uploadId, progress)
         }, { video ->
             postSuccess(video, result)

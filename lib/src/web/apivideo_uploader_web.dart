@@ -32,16 +32,18 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   Future<String> uploadWithUploadToken(
     String token,
     String filePath,
-    String fileName, [
+    String fileName,
+    String? videoId, [
     OnProgress? onProgress,
   ]) async {
     final String script = '''
-      window.uploadWithUploadToken = async function(filePath, token, fileName) {
+      window.uploadWithUploadToken = async function(filePath, token, fileName, videoId) {
         var blob = await fetch(filePath)
           .then(r => r.blob());
         var uploader = new VideoUploader({
             file: blob,
             uploadToken: token,
+            videoId: videoId,
             videoName: fileName,
             chunkSize: 1024*1024*$_chunkSize,
             origin: {
@@ -98,11 +100,12 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
 
   @override
   void createProgressiveUploadWithUploadTokenSession(
-      String sessionId, String token) {
+      String sessionId, String token, String? videoId) {
     final ScriptElement script = ScriptElement()
       ..innerText = '''
         window.progressiveUploaderToken = new ProgressiveUploader({
           uploadToken: "$token",
+          videoId: "$videoId",
           origin: {
             sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
             ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}

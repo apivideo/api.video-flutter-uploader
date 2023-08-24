@@ -73,7 +73,8 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   Future<String> uploadWithUploadToken(
     String token,
     String filePath,
-    String fileName, [
+    String fileName,
+    String? videoId, [
     OnProgress? onProgress,
   ]) async {
     var videoJson = await _uploadChannel.invokeMethod(
@@ -81,6 +82,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
         <String, dynamic>{
           'token': token,
           'filePath': filePath,
+          'videoId': videoId,
         },
         onProgress);
     return videoJson;
@@ -107,9 +109,13 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Creates a progressive upload session for [videoId].
   @override
   void createProgressiveUploadWithUploadTokenSession(
-      String sessionId, String token) {
-    _channel.invokeMethod('createProgressiveUploadWithUploadTokenSession',
-        <String, dynamic>{'sessionId': sessionId, 'token': token});
+      String sessionId, String token, String? videoId) {
+    _channel.invokeMethod(
+        'createProgressiveUploadWithUploadTokenSession', <String, dynamic>{
+      'sessionId': sessionId,
+      'token': token,
+      'videoId': videoId
+    });
   }
 
   /// Uploads a part of a large video file.

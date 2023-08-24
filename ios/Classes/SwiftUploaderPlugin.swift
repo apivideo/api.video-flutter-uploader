@@ -91,7 +91,8 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                let filePath = args["filePath"] as? String,
                let uploadId = args["uploadId"] as? String
             {
-                uploadWithUploadToken(token: token, filePath: filePath, uploadId: uploadId, result: result)
+                let videoId = args["videoId"] as? String
+                uploadWithUploadToken(token: token, filePath: filePath, videoId: videoId, uploadId: uploadId, result: result)
             } else {
                 result(FlutterError(code: "missing_parameters", message: "Token or file path are missing", details: nil))
             }
@@ -123,8 +124,9 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                let sessionId = args["sessionId"] as? String,
                let token = args["token"] as? String
             {
+                let videoId = args["videoId"] as? String
                 do {
-                    try uploadModule.createProgressiveUploadWithUploadTokenSession(sessionId: sessionId, token: token)
+                    try uploadModule.createProgressiveUploadWithUploadTokenSession(sessionId: sessionId, token: token, videoId: videoId)
                 } catch {
                     result(FlutterError(code: "failed_to_create_progressive_session", message: "Failed to create progressive upload session", details: error.localizedDescription))
                 }
@@ -182,9 +184,9 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
         eventSink?(["type": "progressChanged", "uploadId": uploadId, "progress": progress.percentage] as [String: Any])
     }
 
-    private func uploadWithUploadToken(token: String, filePath: String, uploadId: String, result: @escaping FlutterResult) {
+    private func uploadWithUploadToken(token: String, filePath: String, videoId: String?, uploadId: String, result: @escaping FlutterResult) {
         do {
-            try uploadModule.uploadWithUploadToken(token: token, filePath: filePath, videoId: nil, onProgress: { progress in
+            try uploadModule.uploadWithUploadToken(token: token, filePath: filePath, videoId: videoId, onProgress: { progress in
                 self.handleProgress(uploadId: uploadId, progress: progress)
             }, onSuccess: { video in
                 result(video)
