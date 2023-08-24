@@ -169,12 +169,13 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
     }
 
     private func handleError(error: Error, result: @escaping FlutterResult) {
-        if case let ErrorResponse.error(code, data, _, _) = error {
-            var message: String?
+        print(error)
+        if case let ErrorResponse.error(code, data, _, error) = error {
+            var details: String?
             if let data = data {
-                message = String(decoding: data, as: UTF8.self)
+                details = String(decoding: data, as: UTF8.self)
             }
-            result(FlutterError(code: String(code), message: message, details: nil))
+            result(FlutterError(code: String(code), message: error.localizedDescription, details: details))
         } else {
             result(FlutterError(code: "error", message: error.localizedDescription, details: nil))
         }
