@@ -9,7 +9,6 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import video.api.uploader.api.ApiException
-import video.api.uploader.api.upload.IProgressiveUploadSession
 import java.util.concurrent.CancellationException
 
 class MethodCallHandlerImpl(
@@ -118,7 +117,7 @@ class MethodCallHandlerImpl(
                 val uploadId = call.argument<String>("uploadId")
                 when {
                     token == null -> {
-                        result.error("missing_token", "token is missing", null)
+                        result.error("missing_token", "Token is missing", null)
                     }
 
                     filePath == null -> {
@@ -141,7 +140,7 @@ class MethodCallHandlerImpl(
                 val uploadId = call.argument<String>("uploadId")
                 when {
                     videoId == null -> {
-                        result.error("missing_video_id", "videoId is missing", null)
+                        result.error("missing_video_id", "Video id is missing", null)
                     }
 
                     filePath == null -> {
@@ -159,34 +158,55 @@ class MethodCallHandlerImpl(
             }
 
             "createProgressiveUploadSession" -> {
-                call.argument<String>("videoId")?.let {
-                    uploaderModule.createUploadProgressiveSession(it)
-                } ?: result.error("missing_video_id", "videoId is missing", null)
+                val sessionId = call.argument<String>("sessionId")
+                val videoId = call.argument<String>("videoId")
+                when {
+                    sessionId == null -> {
+                        result.error("missing_session_id", "Session id is missing", null)
+                    }
+
+                    videoId == null -> {
+                        result.error("missing_video_id", "Video id is missing", null)
+                    }
+
+                    else -> {
+                        uploaderModule.createUploadProgressiveSession(
+                            sessionId,
+                            videoId
+                        )
+                    }
+                }
             }
 
             "createProgressiveUploadWithUploadTokenSession" -> {
-                call.argument<String>("token")?.let {
-                    uploaderModule.createUploadWithUploadTokenProgressiveSession(it)
-                } ?: result.error("missing_token", "token is missing", null)
+                val sessionId = call.argument<String>("sessionId")
+                val token = call.argument<String>("token")
+                when {
+                    sessionId == null -> {
+                        result.error("missing_session_id", "Session id is missing", null)
+                    }
+
+                    token == null -> {
+                        result.error("missing_token", "Token is missing", null)
+                    }
+
+                    else -> {
+                        uploaderModule.createUploadWithUploadTokenProgressiveSession(
+                            sessionId,
+                            token
+                        )
+                    }
+                }
             }
 
             "uploadPart" -> {
-                val videoId = call.argument<String>("videoId")
-                val token = call.argument<String>("token")
+                val sessionId = call.argument<String>("sessionId")
                 val filePath = call.argument<String>("filePath")
                 val uploadId = call.argument<String>("uploadId")
                 when {
-                    (videoId == null) && (token == null) -> {
+                    (sessionId == null) -> {
                         result.error(
-                            "missing_token_or_video_id", "videoId or token is missing", null
-                        )
-                    }
-
-                    (videoId != null) && (token != null) -> {
-                        result.error(
-                            "either_token_or_video_id",
-                            "Only one of videoId or token is required",
-                            null
+                            "missing_session_id", "Session id is missing", null
                         )
                     }
 
@@ -199,28 +219,19 @@ class MethodCallHandlerImpl(
                     }
 
                     else -> {
-                        uploadPart(videoId ?: token!!, filePath, false, uploadId, result)
+                        uploadPart(sessionId, filePath, false, uploadId, result)
                     }
                 }
             }
 
             "uploadLastPart" -> {
-                val videoId = call.argument<String>("videoId")
-                val token = call.argument<String>("token")
+                val sessionId = call.argument<String>("sessionId")
                 val filePath = call.argument<String>("filePath")
                 val uploadId = call.argument<String>("uploadId")
                 when {
-                    (videoId == null) && (token == null) -> {
+                    (sessionId == null) -> {
                         result.error(
-                            "missing_token_or_video_id", "videoId or token is missing", null
-                        )
-                    }
-
-                    (videoId != null) && (token != null) -> {
-                        result.error(
-                            "either_token_or_video_id",
-                            "Only one of videoId or token is required",
-                            null
+                            "missing_session_id", "Session id is missing", null
                         )
                     }
 
@@ -233,10 +244,24 @@ class MethodCallHandlerImpl(
                     }
 
                     else -> {
-                        uploadPart(videoId ?: token!!, filePath, true, uploadId, result)
+                        uploadPart(sessionId, filePath, true, uploadId, result)
                     }
                 }
             }
+
+            "disposeProgressiveUploadSession" ->
+                call.argument<String>("sessionId")?.let { sessionId ->
+                    try {
+                        uploaderModule.disposeProgressiveUploadSession(sessionId)
+                        result.success(null)
+                    } catch (e: Exception) {
+                        result.error(
+                            "failed_to_dispose_progressive_upload_session",
+                            "Failed to dispose progressive upload session",
+                            e.message
+                        )
+                    }
+                } ?: result.error("missing_session_id", "Session id is missing", null)
 
             "cancelAll" -> {
                 uploaderModule.cancelAll({

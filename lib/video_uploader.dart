@@ -101,12 +101,16 @@ class ApiVideoUploader {
 
 /// A session that manages progressive upload with upload token.
 class ProgressiveUploadWithUploadTokenSession {
+  /// A unique identifier for the upload session.
+  final String _sessionId = UniqueKey().toString();
+
   /// The video token
   final String token;
 
   /// Creates a progressive upload with upload [token].
   ProgressiveUploadWithUploadTokenSession(this.token) {
-    _uploaderPlatform.createProgressiveUploadWithUploadTokenSession(token);
+    _uploaderPlatform.createProgressiveUploadWithUploadTokenSession(
+        _sessionId, token);
   }
 
   /// Uploads a part of a large video file.
@@ -114,12 +118,11 @@ class ProgressiveUploadWithUploadTokenSession {
   /// Get upload progression with [onProgress].
   Future<dynamic> uploadPart(String filePath, [OnProgress? onProgress]) async {
     if (kIsWeb) {
-      await _uploaderPlatform.uploadWithUploadTokenPart(
+      return _uploaderPlatform.uploadWithUploadTokenPart(
           token, filePath, onProgress);
-      return;
     }
     return Video.fromJson(jsonDecode(await _uploaderPlatform
-        .uploadWithUploadTokenPart(token, filePath, onProgress)));
+        .uploadWithUploadTokenPart(_sessionId, filePath, onProgress)));
   }
 
   /// Uploads the last part of a large video file.
@@ -130,18 +133,26 @@ class ProgressiveUploadWithUploadTokenSession {
   Future<Video> uploadLastPart(String filePath,
       [OnProgress? onProgress]) async {
     return Video.fromJson(jsonDecode(await _uploaderPlatform
-        .uploadWithUploadTokenLastPart(token, filePath, onProgress)));
+        .uploadWithUploadTokenLastPart(_sessionId, filePath, onProgress)));
+  }
+
+  /// Cleans up the resources associated with this session.
+  void dispose() {
+    _uploaderPlatform.disposeProgressiveUploadSession(_sessionId);
   }
 }
 
 /// A session that manages progressive upload.
 class ProgressiveUploadSession {
+  /// A unique identifier for the upload session.
+  final String _sessionId = UniqueKey().toString();
+
   /// The video identifier.
   final String videoId;
 
   /// Creates a progressive upload for [videoId].
   ProgressiveUploadSession(this.videoId) {
-    _uploaderPlatform.createProgressiveUploadSession(videoId);
+    _uploaderPlatform.createProgressiveUploadSession(_sessionId, videoId);
   }
 
   /// Uploads a part of a large video file.
@@ -151,11 +162,10 @@ class ProgressiveUploadSession {
   /// Get upload progression with [onProgress].
   Future<dynamic> uploadPart(String filePath, [OnProgress? onProgress]) async {
     if (kIsWeb) {
-      await _uploaderPlatform.uploadPart(videoId, filePath, onProgress);
-      return;
+      return _uploaderPlatform.uploadPart(_sessionId, filePath, onProgress);
     }
     return Video.fromJson(jsonDecode(
-        await _uploaderPlatform.uploadPart(videoId, filePath, onProgress)));
+        await _uploaderPlatform.uploadPart(_sessionId, filePath, onProgress)));
   }
 
   /// Uploads the last part of a large video file.
@@ -167,7 +177,12 @@ class ProgressiveUploadSession {
   /// Get upload progression with [onProgress].
   Future<Video> uploadLastPart(String filePath,
       [OnProgress? onProgress]) async {
-    return Video.fromJson(jsonDecode(
-        await _uploaderPlatform.uploadLastPart(videoId, filePath, onProgress)));
+    return Video.fromJson(jsonDecode(await _uploaderPlatform.uploadLastPart(
+        _sessionId, filePath, onProgress)));
+  }
+
+  /// Cleans up the resources associated with this session.
+  void dispose() {
+    _uploaderPlatform.disposeProgressiveUploadSession(_sessionId);
   }
 }

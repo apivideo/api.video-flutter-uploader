@@ -68,14 +68,20 @@ public class UploaderModule: NSObject {
         uploadRequests.append(request)
     }
 
-    @objc(createUploadProgressiveSession:)
-    func createUploadProgressiveSession(videoId: String) {
-        progressiveUploadSessions[videoId] = VideosAPI.buildProgressiveUploadSession(videoId: videoId)
+    @objc(createUploadProgressiveSession:::)
+    func createUploadProgressiveSession(sessionId: String, videoId: String) throws {
+        if progressiveUploadSessions.keys.contains(sessionId) {
+            throw UploaderError.invalidParameter(message: "Session with id $sessionId already exists")
+        }
+        progressiveUploadSessions[sessionId] = VideosAPI.buildProgressiveUploadSession(videoId: videoId)
     }
 
-    @objc(createProgressiveUploadWithUploadTokenSession::)
-    func createProgressiveUploadWithUploadTokenSession(token: String, videoId: String? = nil) {
-        progressiveUploadSessions[token] = VideosAPI.buildProgressiveUploadWithUploadTokenSession(token: token, videoId: videoId)
+    @objc(createProgressiveUploadWithUploadTokenSession::::)
+    func createProgressiveUploadWithUploadTokenSession(sessionId: String, token: String, videoId: String? = nil) throws {
+        if progressiveUploadSessions.keys.contains(sessionId) {
+            throw UploaderError.invalidParameter(message: "Session with id $sessionId already exists")
+        }
+        progressiveUploadSessions[sessionId] = VideosAPI.buildProgressiveUploadWithUploadTokenSession(token: token, videoId: videoId)
     }
 
     @objc(uploadPart:::::)
@@ -102,6 +108,10 @@ public class UploaderModule: NSObject {
         uploadRequests.append(request)
     }
 
+    func disposeProgressiveUploadSession(_ sessionId: String) {
+        progressiveUploadSessions.removeValue(forKey: sessionId)
+    }
+
     @objc(cancelAll)
     func cancelAll() {
         uploadRequests.forEach { request in
@@ -124,4 +134,8 @@ public class UploaderModule: NSObject {
             }
         }
     }
+}
+
+public enum UploaderError: Error {
+    case invalidParameter(message: String)
 }

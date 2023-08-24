@@ -267,14 +267,27 @@ class UploaderModule(
         }
     }
 
-    fun createUploadProgressiveSession(videoId: String): VideosApi.UploadProgressiveSession =
-        videosApi.createUploadProgressiveSession(videoId)
+    fun createUploadProgressiveSession(
+        sessionId: String,
+        videoId: String
+    ) {
+        if (progressiveUploadSessions.containsKey(sessionId)) {
+            throw IllegalArgumentException("Session with id $sessionId already exists")
+        }
+        progressiveUploadSessions[sessionId] = videosApi.createUploadProgressiveSession(videoId)
+    }
 
     fun createUploadWithUploadTokenProgressiveSession(
+        sessionId: String,
         token: String,
         videoId: String? = null,
-    ): VideosApi.UploadWithUploadTokenProgressiveSession =
-        videosApi.createUploadWithUploadTokenProgressiveSession(token, videoId)
+    ) {
+        if (progressiveUploadSessions.containsKey(sessionId)) {
+            throw IllegalArgumentException("Session with id $sessionId already exists")
+        }
+        progressiveUploadSessions[sessionId] =
+            videosApi.createUploadWithUploadTokenProgressiveSession(token, videoId)
+    }
 
     fun uploadPart(
         sessionId: String,
@@ -360,6 +373,10 @@ class UploaderModule(
         } catch (e: Exception) {
             onError(e)
         }
+    }
+
+    fun disposeProgressiveUploadSession(sessionId: String) {
+        progressiveUploadSessions.remove(sessionId)
     }
 
     fun cancelById(id: String, onCancel: () -> Unit, onError: (Throwable) -> Unit) {

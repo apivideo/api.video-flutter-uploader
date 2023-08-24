@@ -97,7 +97,8 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
-  void createProgressiveUploadWithUploadTokenSession(String token) {
+  void createProgressiveUploadWithUploadTokenSession(
+      String sessionId, String token) {
     final ScriptElement script = ScriptElement()
       ..innerText = '''
         window.progressiveUploaderToken = new ProgressiveUploader({
@@ -113,7 +114,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
-  Future<String> uploadWithUploadTokenPart(String token, String filePath,
+  Future<String> uploadWithUploadTokenPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
     final String script = '''
       window.progressiveUploadWithUploadToken = async function(filePath) {
@@ -135,7 +136,8 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
-  Future<String> uploadWithUploadTokenLastPart(String token, String filePath,
+  Future<String> uploadWithUploadTokenLastPart(
+      String sessionId, String filePath,
       [OnProgress? onProgress]) async {
     final String script = '''
       window.progressiveUploadWithUploadToken = async function(filePath) {
@@ -157,7 +159,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
-  void createProgressiveUploadSession(String videoId) {
+  void createProgressiveUploadSession(String sessionId, String videoId) {
     final ScriptElement script = ScriptElement()
       ..innerText = '''
         window.progressiveUploaderAK = new ProgressiveUploader({
@@ -174,7 +176,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
-  Future<String> uploadPart(String videoId, String filePath,
+  Future<String> uploadPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
     final String script = '''
       window.progressiveUploadWithApiKey = async function(filePath) {
@@ -196,7 +198,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
-  Future<String> uploadLastPart(String videoId, String filePath,
+  Future<String> uploadLastPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
     final String script = '''
       window.progressiveUploadWithApiKey = async function(filePath) {
@@ -248,6 +250,7 @@ class ApplicationName {
     required this.name,
     required this.version,
   });
+
   String name;
   String version;
 }

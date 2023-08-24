@@ -110,12 +110,13 @@ void main() {
   test('progressiveUploadSession', () async {
     final videoId = "abcde";
     final filePath = "path/to/file";
+    late final String sessionId;
 
     // Create session
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
       expect(methodCall.method, "createProgressiveUploadSession");
-      expect(methodCall.arguments["videoId"], videoId);
+      sessionId = methodCall.arguments["sessionId"];
       return;
     });
     final session = ApiVideoUploader.createProgressiveUploadSession(videoId);
@@ -128,7 +129,7 @@ void main() {
       } else if (methodCall.method == "uploadPart") {
         expect(methodCall.method, "uploadPart");
         expect(null, isNot(methodCall.arguments["uploadId"]));
-        expect(methodCall.arguments["videoId"], videoId);
+        expect(methodCall.arguments["sessionId"], sessionId);
         expect(methodCall.arguments["filePath"], filePath);
         return jsonEncode(Video(videoId).toJson());
       } else {
@@ -145,7 +146,7 @@ void main() {
       } else if (methodCall.method == "uploadLastPart") {
         expect(methodCall.method, "uploadLastPart");
         expect(null, isNot(methodCall.arguments["uploadId"]));
-        expect(methodCall.arguments["videoId"], videoId);
+        expect(methodCall.arguments["sessionId"], sessionId);
         expect(methodCall.arguments["filePath"], filePath);
         return jsonEncode(Video(videoId).toJson());
       } else {
@@ -159,6 +160,7 @@ void main() {
     final videoId = "abcde";
     final token = "abcde";
     final filePath = "path/to/file";
+    late final String sessionId;
 
     // Create session
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -166,6 +168,7 @@ void main() {
       expect(
           methodCall.method, "createProgressiveUploadWithUploadTokenSession");
       expect(methodCall.arguments["token"], token);
+      sessionId = methodCall.arguments["sessionId"];
       return;
     });
     final session =
@@ -179,7 +182,7 @@ void main() {
       } else if (methodCall.method == "uploadPart") {
         expect(methodCall.method, "uploadPart");
         expect(null, isNot(methodCall.arguments["uploadId"]));
-        expect(methodCall.arguments["token"], token);
+        expect(methodCall.arguments["sessionId"], sessionId);
         expect(methodCall.arguments["filePath"], filePath);
         return jsonEncode(Video(videoId).toJson());
       } else {
@@ -196,7 +199,7 @@ void main() {
       } else if (methodCall.method == "uploadLastPart") {
         expect(methodCall.method, "uploadLastPart");
         expect(null, isNot(methodCall.arguments["uploadId"]));
-        expect(methodCall.arguments["token"], token);
+        expect(methodCall.arguments["sessionId"], sessionId);
         expect(methodCall.arguments["filePath"], filePath);
         return jsonEncode(Video(videoId).toJson());
       } else {

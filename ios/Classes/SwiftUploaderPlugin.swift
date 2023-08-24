@@ -107,55 +107,57 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             }
         case "createProgressiveUploadSession":
             if let args = call.arguments as? [String: Any],
+               let sessionId = args["sessionId"] as? String,
                let videoId = args["videoId"] as? String
             {
-                uploadModule.createUploadProgressiveSession(videoId: videoId)
+                do {
+                    try uploadModule.createUploadProgressiveSession(sessionId: sessionId, videoId: videoId)
+                } catch {
+                    result(FlutterError(code: "failed_to_create_progressive_session", message: "Failed to create progressive upload session", details: error.localizedDescription))
+                }
             } else {
-                result(FlutterError(code: "missing_video_id", message: "Video id is missing", details: nil))
+                result(FlutterError(code: "missing_parameters", message: "Session id or video id are missing", details: nil))
             }
         case "createProgressiveUploadWithUploadTokenSession":
             if let args = call.arguments as? [String: Any],
+               let sessionId = args["sessionId"] as? String,
                let token = args["token"] as? String
             {
-                uploadModule.createProgressiveUploadWithUploadTokenSession(token: token)
+                do {
+                    try uploadModule.createProgressiveUploadWithUploadTokenSession(sessionId: sessionId, token: token)
+                } catch {
+                    result(FlutterError(code: "failed_to_create_progressive_session", message: "Failed to create progressive upload session", details: error.localizedDescription))
+                }
             } else {
-                result(FlutterError(code: "missing_token", message: "Token is missing", details: nil))
+                result(FlutterError(code: "missing_parameters", message: "Session id or token are missing", details: nil))
             }
         case "uploadPart":
             if let args = call.arguments as? [String: Any],
+               let sessionId = args["sessionId"] as? String,
                let filePath = args["filePath"] as? String,
                let uploadId = args["uploadId"] as? String
             {
-                let videoId = args["videoId"] as? String
-                let token = args["token"] as? String
-                if videoId == nil, token == nil {
-                    result(FlutterError(code: "missing_token_or_video_id", message: "Video id or token is missing", details: nil))
-                } else if videoId != nil, token != nil {
-                    result(FlutterError(code: "either_token_or_video_id", message: "Only one of videoId or token is required", details: nil))
-                } else {
-                    uploadPart(sessionId: videoId ?? token!, filePath: filePath, uploadId: uploadId, result: result)
-                }
-
+                uploadPart(sessionId: sessionId, filePath: filePath, uploadId: uploadId, result: result)
             } else {
-                result(FlutterError(code: "missing_file_path", message: "File path is missing", details: nil))
+                result(FlutterError(code: "missing_parameters", message: "Session id or file path are missing", details: nil))
             }
         case "uploadLastPart":
             if let args = call.arguments as? [String: Any],
+               let sessionId = args["sessionId"] as? String,
                let filePath = args["filePath"] as? String,
                let uploadId = args["uploadId"] as? String
             {
-                let videoId = args["videoId"] as? String
-                let token = args["token"] as? String
-                if videoId == nil, token == nil {
-                    result(FlutterError(code: "missing_token_or_video_id", message: "Video id or token is missing", details: nil))
-                } else if videoId != nil, token != nil {
-                    result(FlutterError(code: "either_token_or_video_id", message: "Only one of videoId or token is required", details: nil))
-                } else {
-                    uploadLastPart(sessionId: videoId ?? token!, filePath: filePath, uploadId: uploadId, result: result)
-                }
-
+                uploadLastPart(sessionId: sessionId, filePath: filePath, uploadId: uploadId, result: result)
             } else {
-                result(FlutterError(code: "missing_file_path", message: "File path is missing", details: nil))
+                result(FlutterError(code: "missing_parameters", message: "Session id or file path are missing", details: nil))
+            }
+        case "disposeProgressiveUploadSession":
+            if let args = call.arguments as? [String: Any],
+               let sessionId = args["sessionId"] as? String
+            {
+                uploadModule.disposeProgressiveUploadSession(sessionId)
+            } else {
+                result(FlutterError(code: "missing_parameters", message: "Session id is missing", details: nil))
             }
         case "cancelAll":
             uploadModule.cancelAll()
