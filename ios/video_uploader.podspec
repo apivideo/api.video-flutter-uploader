@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'video_uploader'
-  s.version          = '0.0.2'
+  s.version          = '1.0.0'
   s.summary          = 'A new flutter plugin project.'
   s.description      = <<-DESC
 A new flutter plugin project.
@@ -15,7 +15,7 @@ A new flutter plugin project.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'ApiVideoUploader', '1.2.1'
+  s.dependency 'ApiVideoUploader', '1.2.2'
   s.platform = :ios, '10.0'
 
   # Flutter.framework does not contain a i386 slice.
