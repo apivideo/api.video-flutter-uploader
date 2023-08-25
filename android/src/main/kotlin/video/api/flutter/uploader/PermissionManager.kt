@@ -15,30 +15,34 @@ class PermissionManager(
 ) : PluginRegistry.RequestPermissionsResultListener {
     private var uniqueRequestCode = 1
 
+    // To request permission, we need the activity
+    var activity: Activity? = null
+
     private val listeners = mutableMapOf<Int, IListener>()
     private fun hasPermission(permission: String) =
         context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
     fun requestPermission(
-        activity: Activity,
         permission: String,
         onGranted: () -> Unit,
         onShowPermissionRationale: (() -> Unit) -> Unit,
         onDenied: () -> Unit
     ) {
-        requestPermission(activity, permission, object : IListener {
-            override fun onGranted() {
-                onGranted()
-            }
+        activity?.let {
+            requestPermission(it, permission, object : IListener {
+                override fun onGranted() {
+                    onGranted()
+                }
 
-            override fun onShowPermissionRationale(onRequiredPermissionLastTime: () -> Unit) {
-                onShowPermissionRationale(onRequiredPermissionLastTime)
-            }
+                override fun onShowPermissionRationale(onRequiredPermissionLastTime: () -> Unit) {
+                    onShowPermissionRationale(onRequiredPermissionLastTime)
+                }
 
-            override fun onDenied() {
-                onDenied()
-            }
-        })
+                override fun onDenied() {
+                    onDenied()
+                }
+            })
+        } ?: throw IllegalStateException("Missing Activity")
     }
 
     private fun requestPermission(

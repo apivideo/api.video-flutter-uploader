@@ -1,6 +1,5 @@
 package video.api.flutter.uploader
 
-import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.work.Operation
@@ -22,14 +21,13 @@ import java.io.File
 import java.util.UUID
 import java.util.concurrent.Executors
 
-
-class UploaderModule(
+class UploaderModuleImpl(
     private val context: Context,
-    private val uploaderLiveDataHost: UploaderLiveDataHost
+    private val uploaderLiveDataHost: UploaderLiveDataHost,
+    private val permissionManager: PermissionManager
 ) {
     private var videosApi = VideosApi()
     private val workManager = WorkManager.getInstance(context)
-    private val permissionManager = PermissionManager(context)
 
     private var applicationName: NameVersion? = null
     private var sdkName: NameVersion? = null
@@ -38,9 +36,6 @@ class UploaderModule(
 
     private val progressiveUploadSessions =
         mutableMapOf<String, IProgressiveUploadSession>()
-
-    // To request permission, we need the activity
-    var activity: Activity? = null
 
     init {
         initializeVideosApi()
@@ -120,33 +115,30 @@ class UploaderModule(
         onCancel: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        activity?.let {
-            permissionManager.requestPermission(
-                it,
-                Utils.readPermission,
-                onGranted = {
-                    uploadWithUploadTokenAndObserve(
-                        token,
-                        filePath,
-                        videoId,
-                        onProgress,
-                        onSuccess,
-                        onCancel,
-                        onError
-                    )
-                },
-                onShowPermissionRationale = { onRequiredPermissionLastTime ->
-                    context.showDialog(
-                        R.string.read_permission_required,
-                        R.string.read_permission_required_message,
-                        android.R.string.ok,
-                        onPositiveButtonClick = { onRequiredPermissionLastTime() }
-                    )
-                },
-                onDenied = {
-                    onError(SecurityException("Missing permission ${Utils.readPermission}"))
-                })
-        } ?: onError(IllegalStateException("Missing activity"))
+        permissionManager.requestPermission(
+            Utils.readPermission,
+            onGranted = {
+                uploadWithUploadTokenAndObserve(
+                    token,
+                    filePath,
+                    videoId,
+                    onProgress,
+                    onSuccess,
+                    onCancel,
+                    onError
+                )
+            },
+            onShowPermissionRationale = { onRequiredPermissionLastTime ->
+                context.showDialog(
+                    R.string.read_permission_required,
+                    R.string.read_permission_required_message,
+                    android.R.string.ok,
+                    onPositiveButtonClick = { onRequiredPermissionLastTime() }
+                )
+            },
+            onDenied = {
+                onError(SecurityException("Missing permission ${Utils.readPermission}"))
+            })
     }
 
     private fun uploadWithUploadTokenAndObserve(
@@ -202,26 +194,23 @@ class UploaderModule(
         onCancel: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        activity?.let {
-            permissionManager.requestPermission(
-                it,
-                Utils.readPermission,
-                onGranted = {
-                    uploadAndObserve(videoId, filePath, onProgress, onSuccess, onCancel, onError)
-                },
-                onShowPermissionRationale = { onRequiredPermissionLastTime ->
-                    context.showDialog(
-                        R.string.read_permission_required,
-                        R.string.read_permission_required_message,
-                        android.R.string.ok,
-                        onPositiveButtonClick = { onRequiredPermissionLastTime() }
-                    )
-                },
-                onDenied = {
-                    onError(SecurityException("Missing permission ${Utils.readPermission}"))
-                }
-            )
-        } ?: onError(IllegalStateException("Missing activity"))
+        permissionManager.requestPermission(
+            Utils.readPermission,
+            onGranted = {
+                uploadAndObserve(videoId, filePath, onProgress, onSuccess, onCancel, onError)
+            },
+            onShowPermissionRationale = { onRequiredPermissionLastTime ->
+                context.showDialog(
+                    R.string.read_permission_required,
+                    R.string.read_permission_required_message,
+                    android.R.string.ok,
+                    onPositiveButtonClick = { onRequiredPermissionLastTime() }
+                )
+            },
+            onDenied = {
+                onError(SecurityException("Missing permission ${Utils.readPermission}"))
+            }
+        )
     }
 
     private fun uploadAndObserve(
@@ -301,34 +290,31 @@ class UploaderModule(
         val session = progressiveUploadSessions[sessionId]
             ?: throw IllegalArgumentException("No session with id $sessionId")
 
-        activity?.let {
-            permissionManager.requestPermission(
-                it,
-                Utils.readPermission,
-                onGranted = {
-                    uploadPartAndObserve(
-                        session,
-                        filePath,
-                        isLastPart,
-                        onProgress,
-                        onSuccess,
-                        onCancel,
-                        onError
-                    )
-                },
-                onShowPermissionRationale = { onRequiredPermissionLastTime ->
-                    context.showDialog(
-                        R.string.read_permission_required,
-                        R.string.read_permission_required_message,
-                        android.R.string.ok,
-                        onPositiveButtonClick = { onRequiredPermissionLastTime() }
-                    )
-                },
-                onDenied = {
-                    onError(SecurityException("Missing permission ${Utils.readPermission}"))
-                }
-            )
-        } ?: onError(IllegalStateException("Missing activity"))
+        permissionManager.requestPermission(
+            Utils.readPermission,
+            onGranted = {
+                uploadPartAndObserve(
+                    session,
+                    filePath,
+                    isLastPart,
+                    onProgress,
+                    onSuccess,
+                    onCancel,
+                    onError
+                )
+            },
+            onShowPermissionRationale = { onRequiredPermissionLastTime ->
+                context.showDialog(
+                    R.string.read_permission_required,
+                    R.string.read_permission_required_message,
+                    android.R.string.ok,
+                    onPositiveButtonClick = { onRequiredPermissionLastTime() }
+                )
+            },
+            onDenied = {
+                onError(SecurityException("Missing permission ${Utils.readPermission}"))
+            }
+        )
     }
 
     private fun uploadPartAndObserve(

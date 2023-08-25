@@ -8,25 +8,35 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 class UploaderPlugin : FlutterPlugin, ActivityAware {
     private val uploaderLiveDataHost = UploaderLiveDataHost()
+    private var permissionManager: PermissionManager? = null
     private var methodCallHandlerImpl: MethodCallHandlerImpl? = null
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        methodCallHandlerImpl = MethodCallHandlerImpl(
-            flutterPluginBinding.applicationContext,
-            flutterPluginBinding.binaryMessenger,
-            uploaderLiveDataHost
-        ).apply {
-            startListening()
+        permissionManager = PermissionManager(flutterPluginBinding.applicationContext).apply {
+            methodCallHandlerImpl = MethodCallHandlerImpl(
+                flutterPluginBinding.applicationContext,
+                flutterPluginBinding.binaryMessenger,
+                uploaderLiveDataHost,
+                this
+            ).apply {
+                startListening()
+            }
         }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         methodCallHandlerImpl?.stopListening()
+        methodCallHandlerImpl = null
+        permissionManager = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         val activity = binding.activity
-        methodCallHandlerImpl?.activity = activity
+        permissionManager?.let {
+            it.activity = activity
+            binding.addRequestPermissionsResultListener(it)
+        }
+
         if (activity is LifecycleOwner) {
             uploaderLiveDataHost.lifecycleOwner = activity
         } else {
@@ -35,14 +45,17 @@ class UploaderPlugin : FlutterPlugin, ActivityAware {
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        methodCallHandlerImpl?.activity = null
+        permissionManager?.activity = null
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        methodCallHandlerImpl?.activity = binding.activity
+        permissionManager?.let {
+            it.activity = null
+            binding.addRequestPermissionsResultListener(it)
+        }
     }
 
     override fun onDetachedFromActivity() {
-        methodCallHandlerImpl?.activity = null
+        permissionManager?.activity = null
     }
 }

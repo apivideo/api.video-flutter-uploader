@@ -14,20 +14,15 @@ import java.util.concurrent.CancellationException
 class MethodCallHandlerImpl(
     context: Context,
     messenger: BinaryMessenger,
-    uploaderLiveDataHost: UploaderLiveDataHost
+    uploaderLiveDataHost: UploaderLiveDataHost,
+    permissionManager: PermissionManager
 ) :
     MethodChannel.MethodCallHandler {
     private val methodChannel = MethodChannel(messenger, METHOD_CHANNEL_NAME)
     private val eventChannel = EventChannel(messenger, EVENT_CHANNEL_NAME)
     private var eventSink: EventChannel.EventSink? = null
-
-    private val uploaderModule = UploaderModule(context, uploaderLiveDataHost)
-
-    var activity: Activity? = null
-        set(value) {
-            uploaderModule.activity = value
-            field = value
-        }
+    private val uploaderModuleImpl =
+        UploaderModuleImpl(context, uploaderLiveDataHost, permissionManager)
 
     fun startListening() {
         methodChannel.setMethodCallHandler(this)
@@ -54,7 +49,7 @@ class MethodCallHandlerImpl(
                 try {
                     val name = call.argument<String>("name")!!
                     val version = call.argument<String>("version")!!
-                    uploaderModule.setSdkName(name, version)
+                    uploaderModuleImpl.setSdkName(name, version)
                     result.success(null)
                 } catch (e: Exception) {
                     result.error(
@@ -68,7 +63,7 @@ class MethodCallHandlerImpl(
                 val version = call.argument<String>("version")!!
 
                 try {
-                    uploaderModule.setApplicationName(name, version)
+                    uploaderModuleImpl.setApplicationName(name, version)
                     result.success(null)
                 } catch (e: Exception) {
                     result.error(
@@ -79,14 +74,14 @@ class MethodCallHandlerImpl(
 
             "setEnvironment" -> {
                 call.argument<String>("environment")?.let {
-                    uploaderModule.environment = it
+                    uploaderModuleImpl.environment = it
                     result.success(null)
                 } ?: result.error("missing_environment", "Environment is missing", null)
             }
 
             "setApiKey" -> {
                 call.argument<String>("apiKey")?.let { apiKey ->
-                    uploaderModule.apiKey = apiKey
+                    uploaderModuleImpl.apiKey = apiKey
                     result.success(null)
                 } ?: result.error("missing_api_key", "API key is missing", null)
             }
@@ -94,8 +89,8 @@ class MethodCallHandlerImpl(
             "setChunkSize" -> {
                 call.argument<Int>("size")?.let { chunkSize ->
                     try {
-                        uploaderModule.chunkSize = chunkSize.toLong()
-                        result.success(uploaderModule.chunkSize.toInt())
+                        uploaderModuleImpl.chunkSize = chunkSize.toLong()
+                        result.success(uploaderModuleImpl.chunkSize.toInt())
                     } catch (e: Exception) {
                         result.error(
                             "failed_to_set_chunk_size", "Failed to set chunk size", e.message
@@ -106,7 +101,7 @@ class MethodCallHandlerImpl(
 
             "setTimeout" -> {
                 call.argument<Int>("timeout")?.let { timeout ->
-                    uploaderModule.timeout = timeout.toDouble()
+                    uploaderModuleImpl.timeout = timeout.toDouble()
                     result.success(null)
                 } ?: result.error("missing_timeout", "Timeout is missing", null)
             }
@@ -171,7 +166,7 @@ class MethodCallHandlerImpl(
                     }
 
                     else -> {
-                        uploaderModule.createUploadProgressiveSession(
+                        uploaderModuleImpl.createUploadProgressiveSession(
                             sessionId,
                             videoId
                         )
@@ -193,7 +188,7 @@ class MethodCallHandlerImpl(
                     }
 
                     else -> {
-                        uploaderModule.createUploadWithUploadTokenProgressiveSession(
+                        uploaderModuleImpl.createUploadWithUploadTokenProgressiveSession(
                             sessionId,
                             token,
                             videoId
@@ -255,7 +250,7 @@ class MethodCallHandlerImpl(
             "disposeProgressiveUploadSession" ->
                 call.argument<String>("sessionId")?.let { sessionId ->
                     try {
-                        uploaderModule.disposeProgressiveUploadSession(sessionId)
+                        uploaderModuleImpl.disposeProgressiveUploadSession(sessionId)
                         result.success(null)
                     } catch (e: Exception) {
                         result.error(
@@ -267,7 +262,7 @@ class MethodCallHandlerImpl(
                 } ?: result.error("missing_session_id", "Session id is missing", null)
 
             "cancelAll" -> {
-                uploaderModule.cancelAll({
+                uploaderModuleImpl.cancelAll({
                     result.success(null)
                 }, { error ->
                     result.error("failed_to_cancel", "Failed to cancel", error)
@@ -319,29 +314,40 @@ class MethodCallHandlerImpl(
         uploadId: String,
         result: MethodChannel.Result
     ) {
-        uploaderModule.uploadWithUploadToken(token, filePath, videoId, { progress ->
-            postOnProgress(uploadId, progress)
-        }, { video ->
-            postSuccess(video, result)
-        }, {
-            postException(CancellationException("Upload was cancelled"), result)
-        }, { e ->
+        try {
+            uploaderModuleImpl.uploadWithUploadToken(token, filePath, videoId, { progress ->
+                postOnProgress(uploadId, progress)
+            }, { video ->
+                postSuccess(video, result)
+            }, {
+                postException(CancellationException("Upload was cancelled"), result)
+            }, { e ->
+                postException(e, result)
+            })
+        } catch (e: Exception) {
             postException(e, result)
-        })
+        }
     }
 
     private fun upload(
-        videoId: String, filePath: String, uploadId: String, result: MethodChannel.Result
+        videoId: String,
+        filePath: String,
+        uploadId: String,
+        result: MethodChannel.Result
     ) {
-        uploaderModule.upload(videoId, filePath, { progress ->
-            postOnProgress(uploadId, progress)
-        }, { video ->
-            postSuccess(video, result)
-        }, {
-            postException(CancellationException("Upload was cancelled"), result)
-        }, { e ->
+        try {
+            uploaderModuleImpl.upload(videoId, filePath, { progress ->
+                postOnProgress(uploadId, progress)
+            }, { video ->
+                postSuccess(video, result)
+            }, {
+                postException(CancellationException("Upload was cancelled"), result)
+            }, { e ->
+                postException(e, result)
+            })
+        } catch (e: Exception) {
             postException(e, result)
-        })
+        }
     }
 
     private fun uploadPart(
@@ -352,7 +358,7 @@ class MethodCallHandlerImpl(
         result: MethodChannel.Result
     ) {
         try {
-            uploaderModule.uploadPart(sessionId, filePath, isLastPart, { progress ->
+            uploaderModuleImpl.uploadPart(sessionId, filePath, isLastPart, { progress ->
                 postOnProgress(uploadId, progress)
             }, { video ->
                 postSuccess(video, result)
