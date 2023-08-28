@@ -37,7 +37,7 @@ public class UploaderModule: NSObject {
     }
 
     @objc(setChunkSize::)
-    func setChunkSize(size: Int) throws {
+    func setChunkSize(_ size: Int) throws {
         try ApiVideoUploader.setChunkSize(chunkSize: size)
     }
 
@@ -52,8 +52,7 @@ public class UploaderModule: NSObject {
 
     @objc(uploadWithUploadToken:::::::)
     func uploadWithUploadToken(token: String, filePath: String, videoId: String?, onProgress: @escaping (Progress) -> Void, onSuccess: @escaping (String) -> Void, onError: @escaping (Error) -> Void) throws {
-        let url = URL(fileURLWithPath: filePath)
-        let request = try VideosAPI.uploadWithUploadToken(token: token, file: url, videoId: videoId, onProgressReady: onProgress) { video, error in
+        let request = try VideosAPI.uploadWithUploadToken(token: token, file: filePath.url, videoId: videoId, onProgressReady: onProgress) { video, error in
             self.handleCompletion(video: video, error: error, onSuccess: onSuccess, onError: onError)
         }
         uploadRequests.append(request)
@@ -61,8 +60,7 @@ public class UploaderModule: NSObject {
 
     @objc(upload::::::)
     func upload(videoId: String, filePath: String, onProgress: @escaping (Progress) -> Void, onSuccess: @escaping (String) -> Void, onError: @escaping (Error) -> Void) throws {
-        let url = URL(fileURLWithPath: filePath)
-        let request = try VideosAPI.upload(videoId: videoId, file: url, onProgressReady: onProgress) { video, error in
+        let request = try VideosAPI.upload(videoId: videoId, file: filePath.url, onProgressReady: onProgress) { video, error in
             self.handleCompletion(video: video, error: error, onSuccess: onSuccess, onError: onError)
         }
         uploadRequests.append(request)
@@ -89,8 +87,7 @@ public class UploaderModule: NSObject {
         guard let session = progressiveUploadSessions[sessionId] else {
             return
         }
-        let url = URL(fileURLWithPath: filePath)
-        let request = session.uploadPart(file: url, onProgressReady: onProgress, apiResponseQueue: ApiVideoUploader.apiResponseQueue) { video, error in
+        let request = session.uploadPart(file: filePath.url, onProgressReady: onProgress, apiResponseQueue: ApiVideoUploader.apiResponseQueue) { video, error in
             self.handleCompletion(video: video, error: error, onSuccess: onSuccess, onError: onError)
         }
         uploadRequests.append(request)
@@ -101,8 +98,7 @@ public class UploaderModule: NSObject {
         guard let session = progressiveUploadSessions[sessionId] else {
             return
         }
-        let url = URL(fileURLWithPath: filePath)
-        let request = session.uploadLastPart(file: url, onProgressReady: onProgress, apiResponseQueue: ApiVideoUploader.apiResponseQueue) { video, error in
+        let request = session.uploadLastPart(file: filePath.url, onProgressReady: onProgress, apiResponseQueue: ApiVideoUploader.apiResponseQueue) { video, error in
             self.handleCompletion(video: video, error: error, onSuccess: onSuccess, onError: onError)
         }
         uploadRequests.append(request)
