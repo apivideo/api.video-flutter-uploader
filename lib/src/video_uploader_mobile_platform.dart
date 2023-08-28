@@ -225,7 +225,7 @@ class _UploadChannel {
     if (event["type"] == "progressChanged") {
       final String id = event["uploadId"];
       if (_onProgressMap[id] != null) {
-        final int progress = event["progress"];
+        final double progress = event["progress"];
         _onProgressMap[id]!(progress);
       }
     } else {

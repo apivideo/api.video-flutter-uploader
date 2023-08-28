@@ -11,8 +11,8 @@ export 'src/types.dart';
 export 'src/video_uploader_mobile_platform.dart';
 
 /// Progress indicator callback
-/// [progress] is a value between 0 and 100
-typedef void OnProgress(int progress);
+/// [progress] is a value between 0 and 1
+typedef void OnProgress(double progress);
 
 ApiVideoUploaderPlatform get _uploaderPlatform {
   return ApiVideoUploaderPlatform.instance;

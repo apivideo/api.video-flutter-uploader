@@ -99,7 +99,7 @@ class UploaderPageState extends State<UploaderPage> {
                         _tokenTextController.text, image.path,
                         onProgress: (progress) {
                       log("Progress :$progress");
-                      setProgress(progress.toDouble() / 100);
+                      setProgress(progress);
                     });
                     log("VideoId : ${video.videoId}");
                     log("Title : ${video.title}");

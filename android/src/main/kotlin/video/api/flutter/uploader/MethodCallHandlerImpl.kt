@@ -1,6 +1,5 @@
 package video.api.flutter.uploader
 
-import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -279,7 +278,7 @@ class MethodCallHandlerImpl(
                 mapOf(
                     "type" to "progressChanged",
                     "uploadId" to uploadId,
-                    "progress" to progress
+                    "progress" to (progress / 100.0)
                 )
             )
         }

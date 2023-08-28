@@ -52,7 +52,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             },
         });
         if (onProgress != null) {
-          uploader.onProgress((e) => onProgress(Math.round(e.uploadedBytes * 100 / e.totalBytes)));
+          uploader.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
         }
         var jsonObject = await uploader.upload();
         return JSON.stringify(jsonObject);
@@ -84,7 +84,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
             },
         });
         if (onProgress != null) {
-          uploader.onProgress((e) => onProgress(Math.round(e.uploadedBytes * 100 / e.totalBytes)));
+          uploader.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
         }
         var jsonObject = await uploader.upload();
         return JSON.stringify(jsonObject);
@@ -124,7 +124,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         var blob = await fetch(filePath)
           .then(r => r.blob());
         if (onProgress != null) {
-          window.progressiveUploaderToken.onProgress((e) => onProgress(Math.round(e.uploadedBytes * 100 / e.totalBytes)));
+          window.progressiveUploaderToken.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
         }
         await window.progressiveUploaderToken.uploadPart(blob);
         return '';
@@ -147,7 +147,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         var blob = await fetch(filePath)
           .then(r => r.blob());
         if (onProgress != null) {
-          window.progressiveUploaderToken.onProgress((e) => onProgress(Math.round(e.uploadedBytes * 100 / e.totalBytes)));
+          window.progressiveUploaderToken.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
         }
         var jsonObject = await window.progressiveUploaderToken.uploadLastPart(blob);
         return JSON.stringify(jsonObject);
@@ -186,7 +186,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         var blob = await fetch(filePath)
           .then(r => r.blob());
         if (onProgress != null) {
-          window.progressiveUploaderAK.onProgress((e) => onProgress(Math.round(e.uploadedBytes * 100 / e.totalBytes)));
+          window.progressiveUploaderAK.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
         }
         await window.progressiveUploaderAK.uploadPart(blob);
         return '';
@@ -208,7 +208,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
         var blob = await fetch(filePath)
           .then(r => r.blob());
         if (onProgress != null) {
-          window.progressiveUploaderAK.onProgress((e) => onProgress(Math.round(e.uploadedBytes * 100 / e.totalBytes)));
+          window.progressiveUploaderAK.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
         }
         var jsonObject = await window.progressiveUploaderAK.uploadLastPart(blob);
         return JSON.stringify(jsonObject);

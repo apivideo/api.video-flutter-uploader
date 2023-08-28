@@ -69,7 +69,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                let size = args["size"] as? Int
             {
                 do {
-                    try uploadModule.setChunkSize(size: size)
+                    try uploadModule.setChunkSize(size)
                     result(uploadModule.chunkSize)
                 } catch {
                     result(FlutterError(code: "failed_to_set_chunk_size", message: "Failed to set chunk size", details: error.localizedDescription))
@@ -182,7 +182,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
     }
 
     private func handleProgress(uploadId: String, progress: Progress) {
-        eventSink?(["type": "progressChanged", "uploadId": uploadId, "progress": progress.percentage] as [String: Any])
+        eventSink?(["type": "progressChanged", "uploadId": uploadId, "progress": progress.progress] as [String: Any])
     }
 
     private func uploadWithUploadToken(token: String, filePath: String, videoId: String?, uploadId: String, result: @escaping FlutterResult) {
