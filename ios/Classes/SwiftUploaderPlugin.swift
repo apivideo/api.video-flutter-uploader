@@ -32,7 +32,7 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
                     try uploadModule.setSdkName(name: name, version: version)
                     result(nil)
                 } catch {
-                    result(FlutterError(code: "failed_to_set_sdk_name", message: "Failed to set SDK name and version", details: error.localizedDescription))
+                    result(FlutterError(code: "failed_to_set_sdk_name", message: "Failed to set SDK name", details: error.localizedDescription))
                 }
             } else {
                 result(FlutterError(code: "missing_parameters", message: "Name or version is missing", details: nil))
