@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import io.flutter.plugin.common.PluginRegistry
 
 /**
@@ -20,7 +21,7 @@ class PermissionManager(
 
     private val listeners = mutableMapOf<Int, IListener>()
     private fun hasPermission(permission: String) =
-        context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
     fun requestPermission(
         permission: String,
