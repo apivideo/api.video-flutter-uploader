@@ -103,13 +103,15 @@ class UploaderPageState extends State<UploaderPage> {
                     });
                     log("VideoId : ${video.videoId}");
                     log("Title : ${video.title}");
-                    showSuccessSnackBar("Video ${video.videoId} uploaded");
+                    showSuccessSnackBar(
+                        context, "Video ${video.videoId} uploaded");
                   } on Exception catch (e) {
                     log("Failed to upload video: $e");
-                    showErrorSnackBar("Failed to upload video: ${(e).message}");
+                    showErrorSnackBar(
+                        context, "Failed to upload video: ${(e).message}");
                   } catch (e) {
                     log("Failed to upload video: $e");
-                    showErrorSnackBar("Failed to upload video");
+                    showErrorSnackBar(context, "Failed to upload video");
                   }
                 }
               },
@@ -144,18 +146,18 @@ class UploaderPageState extends State<UploaderPage> {
     );
   }
 
-  void showSuccessSnackBar(String message) {
-    showSnackBar(message, backgroundColor: Colors.green);
+  void showSuccessSnackBar(BuildContext context, String message) {
+    showSnackBar(context, message, backgroundColor: Colors.green);
   }
 
-  void showErrorSnackBar(String message) {
-    showSnackBar(message,
+  void showErrorSnackBar(BuildContext context, String message) {
+    showSnackBar(context, message,
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 60),
         showCloseIcon: true);
   }
 
-  void showSnackBar(String message,
+  void showSnackBar(BuildContext context, String message,
       {Color? backgroundColor,
       Duration duration = const Duration(seconds: 4),
       bool showCloseIcon = false}) {
