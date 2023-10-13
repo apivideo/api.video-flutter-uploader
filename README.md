@@ -100,7 +100,7 @@ This project is using external library
 
 | Plugin                 | README                                                                           |
 |------------------------|----------------------------------------------------------------------------------|
-| iOS-video-uploader     | [iOS-video-uploader](https://github.com/apivideo/api.video-ios-uploader)         |
+| Swift-video-uploader   | [Swift-video-uploader](https://github.com/apivideo/api.video-swift-uploader)     |
 | android-video-uploader | [android-video-uploader](https://github.com/apivideo/api.video-android-uploader) |
 
 # FAQ
