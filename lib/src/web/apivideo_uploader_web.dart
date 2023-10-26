@@ -45,6 +45,11 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
+  Future<void> cancelAll() async {
+    return await promiseToFuture(jsCancelAll());
+  }
+
+  @override
   void setApiKey(String apiKey) => _apiKey = apiKey;
 
   @override

@@ -42,3 +42,6 @@ external Future<String> jsUploadWithUploadTokenLastPart(
 @JS("createProgressiveUploadWithApiKeySession")
 external void jsCreateProgressiveUploadWithApiKeySession(
     String sessionId, String apiKey, String videoId);
+
+@JS('cancelAll')
+external Future<String> jsCancelAll();
