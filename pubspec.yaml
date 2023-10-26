@@ -26,6 +26,8 @@ dev_dependencies:
   json_serializable: ^6.1.1
 
 flutter:
+  assets:
+    - lib/assets/uploader.js
   plugin:
     platforms:
       android:

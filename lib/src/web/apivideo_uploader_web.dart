@@ -11,23 +11,53 @@ import 'js_controller.dart';
 
 class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   late String _apiKey;
-  int _chunkSize = 50;
-  ApplicationName? _applicationName;
 
   static void registerWith(Registrar registrar) {
     ApiVideoUploaderPlatform.instance = ApiVideoUploaderPlugin();
+  }
+
+  ApiVideoUploaderPlugin() {
+    injectJS();
+  }
+
+  Future<void> injectJS() async {
+    document.body?.nodes.add(ScriptElement()
+      ..type = 'text/javascript'
+      ..src = '/packages/video_uploader/assets/uploader.js'
+      ..addEventListener('load', (event) {
+        // Fix Require.js issues with Flutter overrides
+        // https://github.com/flutter/flutter/issues/126713
+        js.context.callMethod('fixRequireJs', []);
+
+        document.body!.append(ScriptElement()
+          ..type = 'text/javascript'
+          ..innerText = '''window.apiVideoFlutterUploader = { 
+                      params: {
+                        sdkVersion: '$sdkVersion',
+                        chunkSize: 50,
+                      }
+                    }''');
+
+        document.body!.append(ScriptElement()
+          ..src = 'https://unpkg.com/@api.video/video-uploader'
+          ..type = 'application/javascript');
+      }));
   }
 
   @override
   void setApiKey(String apiKey) => _apiKey = apiKey;
 
   @override
-  void setApplicationName(String name, String version) =>
-      _applicationName = ApplicationName(name: name, version: version);
+  void setApplicationName(String name, String version) {
+    jsSetApplicationName(name, version);
+  }
 
   @override
-  void setChunkSize(int size) => _chunkSize = size;
+  void setChunkSize(int size) {
+    jsSetChunkSize(size);
+  }
 
+  // standard upload with upload token
   @override
   Future<String> uploadWithUploadToken(
     String token,
@@ -36,215 +66,62 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
     String? videoId, [
     OnProgress? onProgress,
   ]) async {
-    final String script = '''
-      window.uploadWithUploadToken = async function(filePath, token, fileName, videoId) {
-        var blob = await fetch(filePath)
-          .then(r => r.blob());
-        var uploader = new VideoUploader({
-            file: blob,
-            uploadToken: token,
-            videoId: videoId,
-            videoName: fileName,
-            chunkSize: 1024*1024*$_chunkSize,
-            origin: {
-              sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
-              ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
-            },
-        });
-        if (onProgress != null) {
-          uploader.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
-        }
-        var jsonObject = await uploader.upload();
-        return JSON.stringify(jsonObject);
-      };
-    ''';
-    return await useJsScript<String>(
-      onProgress: onProgress,
-      jsMethod: () => jsUploadWithUploadToken(filePath, token, fileName),
-      scriptContent: script,
-      scriptId: 'uploadWithUploadTokenScript',
-    );
+    return await promiseToFuture(jsUploadWithUploadToken(
+        filePath,
+        token,
+        fileName,
+        onProgress != null ? js.allowInterop(onProgress) : null,
+        videoId));
   }
 
+  // standard upload with api key
   @override
   Future<String> upload(String videoId, String filePath,
       [OnProgress? onProgress]) async {
-    final String script = '''
-      window.uploadWithApiKey = async function(filePath, apiKey, videoId) {
-        var blob = await fetch(filePath)
-          .then(r => r.blob());
-        var uploader = new VideoUploader({
-            file: blob,
-            apiKey,
-            videoId,
-            chunkSize: $_chunkSize,
-            origin: {
-              sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
-              ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
-            },
-        });
-        if (onProgress != null) {
-          uploader.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
-        }
-        var jsonObject = await uploader.upload();
-        return JSON.stringify(jsonObject);
-      };
-    ''';
-    return await useJsScript<String>(
-      onProgress: onProgress,
-      jsMethod: () => jsUploadWithApiKey(filePath, _apiKey, videoId),
-      scriptContent: script,
-      scriptId: 'uploadWithApiKeyScript',
-    );
+    return await promiseToFuture(jsUploadWithApiKey(filePath, _apiKey,
+        onProgress != null ? js.allowInterop(onProgress) : null, videoId));
   }
 
+  // progressive upload with upload token
   @override
   void createProgressiveUploadWithUploadTokenSession(
       String sessionId, String token, String? videoId) {
-    final ScriptElement script = ScriptElement()
-      ..innerText = '''
-        window.progressiveUploaderToken = new ProgressiveUploader({
-          uploadToken: "$token",
-          videoId: "$videoId",
-          origin: {
-            sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
-            ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
-          },
-        });
-      '''
-      ..id = 'progressiveUploadTokenScript';
-    document.body?.insertAdjacentElement('beforeend', script);
+    jsCreateProgressiveUploadWithUploadTokenSession(sessionId, token, videoId);
   }
 
   @override
   Future<String> uploadWithUploadTokenPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    final String script = '''
-      window.progressiveUploadWithUploadToken = async function(filePath) {
-        var blob = await fetch(filePath)
-          .then(r => r.blob());
-        if (onProgress != null) {
-          window.progressiveUploaderToken.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
-        }
-        await window.progressiveUploaderToken.uploadPart(blob);
-        return '';
-      }
-    ''';
-    return await useJsScript<String>(
-      onProgress: onProgress,
-      jsMethod: () => jsProgressiveUploadWithToken(filePath),
-      scriptContent: script,
-      scriptId: 'progressiveUploadWithTokenScript',
-    );
+    return await promiseToFuture(jsUploadWithUploadTokenPart(sessionId,
+        filePath, onProgress != null ? js.allowInterop(onProgress) : null));
   }
 
   @override
   Future<String> uploadWithUploadTokenLastPart(
       String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    final String script = '''
-      window.progressiveUploadWithUploadToken = async function(filePath) {
-        var blob = await fetch(filePath)
-          .then(r => r.blob());
-        if (onProgress != null) {
-          window.progressiveUploaderToken.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
-        }
-        var jsonObject = await window.progressiveUploaderToken.uploadLastPart(blob);
-        return JSON.stringify(jsonObject);
-      }
-    ''';
-    return await useJsScript<String>(
-      onProgress: onProgress,
-      jsMethod: () => jsProgressiveUploadWithToken(filePath),
-      scriptContent: script,
-      scriptId: 'progressiveUploadWithTokenScript',
-    );
+    return await promiseToFuture(jsUploadWithUploadTokenLastPart(sessionId,
+        filePath, onProgress != null ? js.allowInterop(onProgress) : null));
   }
 
+  // progressive upload with api key
   @override
   void createProgressiveUploadSession(String sessionId, String videoId) {
-    final ScriptElement script = ScriptElement()
-      ..innerText = '''
-        window.progressiveUploaderAK = new ProgressiveUploader({
-          videoId: "$videoId",
-          apiKey: "$_apiKey",
-          origin: {
-            sdk: { name: 'flutter-uploader', version: '$sdkVersion', },
-            ${_applicationName != null ? "application: { name: '${_applicationName!.name}', version: '${_applicationName!.version}', }," : ""}
-          },
-        });
-      '''
-      ..id = 'progressiveUploadAKScript';
-    document.body?.insertAdjacentElement('beforeend', script);
+    jsCreateProgressiveUploadWithApiKeySession(sessionId, _apiKey, videoId);
   }
 
   @override
   Future<String> uploadPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    final String script = '''
-      window.progressiveUploadWithApiKey = async function(filePath) {
-        var blob = await fetch(filePath)
-          .then(r => r.blob());
-        if (onProgress != null) {
-          window.progressiveUploaderAK.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
-        }
-        await window.progressiveUploaderAK.uploadPart(blob);
-        return '';
-      }
-    ''';
-    return await useJsScript<String>(
-      onProgress: onProgress,
-      jsMethod: () => jsProgressiveUploadWithApiKey(filePath),
-      scriptContent: script,
-      scriptId: 'progressiveUploadWithApiKey',
-    );
+    return await promiseToFuture(jsUploadWithUploadTokenPart(sessionId,
+        filePath, onProgress != null ? js.allowInterop(onProgress) : null));
   }
 
   @override
   Future<String> uploadLastPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    final String script = '''
-      window.progressiveUploadWithApiKey = async function(filePath) {
-        var blob = await fetch(filePath)
-          .then(r => r.blob());
-        if (onProgress != null) {
-          window.progressiveUploaderAK.onProgress((e) => onProgress(e.uploadedBytes / e.totalBytes));
-        }
-        var jsonObject = await window.progressiveUploaderAK.uploadLastPart(blob);
-        return JSON.stringify(jsonObject);
-      }
-    ''';
-    return await useJsScript<String>(
-      onProgress: onProgress,
-      jsMethod: () => jsProgressiveUploadWithApiKey(filePath),
-      scriptContent: script,
-      scriptId: 'progressiveUploadWithApiKey',
-    );
-  }
-
-  dynamic useJsScript<T>({
-    OnProgress? onProgress,
-    required Function jsMethod,
-    required String scriptContent,
-    required String scriptId,
-  }) async {
-    if (onProgress != null)
-      js.context['onProgress'] = js.allowInterop(onProgress);
-    else
-      js.context['onProgress'] = null;
-
-    final ScriptElement script = ScriptElement()
-      ..innerText = scriptContent
-      ..id = scriptId;
-    if (document.body == null) {
-      throw Exception(
-        'No body tag found in the DOM: try to add a body tag to the DOM and retry.',
-      );
-    }
-    document.body!.insertAdjacentElement('beforeend', script);
-    final res = await promiseToFuture<T>(jsMethod());
-    document.body!.querySelector('#$scriptId')!.remove();
-    return res;
+    return await promiseToFuture(jsUploadWithUploadTokenLastPart(sessionId,
+        filePath, onProgress != null ? js.allowInterop(onProgress) : null));
   }
 }
 

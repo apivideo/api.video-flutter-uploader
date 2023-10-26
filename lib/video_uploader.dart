@@ -124,10 +124,6 @@ class ProgressiveUploadWithUploadTokenSession {
   ///
   /// Get upload progression with [onProgress].
   Future<dynamic> uploadPart(String filePath, {OnProgress? onProgress}) async {
-    if (kIsWeb) {
-      return _uploaderPlatform.uploadWithUploadTokenPart(
-          token, filePath, onProgress);
-    }
     return Video.fromJson(jsonDecode(await _uploaderPlatform
         .uploadWithUploadTokenPart(_sessionId, filePath, onProgress)));
   }
@@ -168,9 +164,6 @@ class ProgressiveUploadSession {
   ///
   /// Get upload progression with [onProgress].
   Future<dynamic> uploadPart(String filePath, {OnProgress? onProgress}) async {
-    if (kIsWeb) {
-      return _uploaderPlatform.uploadPart(_sessionId, filePath, onProgress);
-    }
     return Video.fromJson(jsonDecode(
         await _uploaderPlatform.uploadPart(_sessionId, filePath, onProgress)));
   }
