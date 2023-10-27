@@ -45,3 +45,6 @@ external void jsCreateProgressiveUploadWithApiKeySession(
 
 @JS('cancelAll')
 external Future<String> jsCancelAll();
+
+@JS('disposeProgressiveUploadSession')
+external void jsDisposeProgressiveUploadSession(String sessionId);

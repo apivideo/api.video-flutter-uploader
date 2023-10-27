@@ -50,6 +50,11 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   }
 
   @override
+  void disposeProgressiveUploadSession(String sessionId) {
+    jsDisposeProgressiveUploadSession(sessionId);
+  }
+
+  @override
   void setApiKey(String apiKey) => _apiKey = apiKey;
 
   @override
