@@ -23,24 +23,22 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   Future<void> injectJS() async {
     document.body?.nodes.add(ScriptElement()
       ..type = 'text/javascript'
-      ..src = '/packages/video_uploader/assets/uploader.js'
+      ..innerHtml = ''' 
+        // fix JS module loading - https://github.com/flutter/flutter/issues/126713
+        if (typeof window.define == 'function') {
+          delete window.define.amd;
+          delete window.exports;
+          delete window.module;
+        }
+        window.apiVideoGetBlobFromPath = async (filePath) =>  await fetch(filePath).then(r => r.blob()); 
+        ''');
+
+    document.body!.append(ScriptElement()
+      ..src = 'https://unpkg.com/@api.video/video-uploader'
+      ..type = 'application/javascript'
       ..addEventListener('load', (event) {
-        // Fix Require.js issues with Flutter overrides
-        // https://github.com/flutter/flutter/issues/126713
-        js.context.callMethod('fixRequireJs', []);
-
-        document.body!.append(ScriptElement()
-          ..type = 'text/javascript'
-          ..innerText = '''window.apiVideoFlutterUploader = { 
-                      params: {
-                        sdkVersion: '$sdkVersion',
-                        chunkSize: 50,
-                      }
-                    }''');
-
-        document.body!.append(ScriptElement()
-          ..src = 'https://unpkg.com/@api.video/video-uploader'
-          ..type = 'application/javascript');
+        jsSetSdkName("flutter-uploader", sdkVersion);
+        jsSetChunkSize(50);
       }));
   }
 
@@ -77,7 +75,7 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
     OnProgress? onProgress,
   ]) async {
     return await promiseToFuture(jsUploadWithUploadToken(
-        filePath,
+        await promiseToFuture(jsGetBlobFromPath(filePath)),
         token,
         fileName,
         onProgress != null ? js.allowInterop(onProgress) : null,
@@ -88,8 +86,11 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   @override
   Future<String> upload(String videoId, String filePath,
       [OnProgress? onProgress]) async {
-    return await promiseToFuture(jsUploadWithApiKey(filePath, _apiKey,
-        onProgress != null ? js.allowInterop(onProgress) : null, videoId));
+    return await promiseToFuture(jsUploadWithApiKey(
+        await promiseToFuture(jsGetBlobFromPath(filePath)),
+        _apiKey,
+        onProgress != null ? js.allowInterop(onProgress) : null,
+        videoId));
   }
 
   // progressive upload with upload token
@@ -102,16 +103,20 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   @override
   Future<String> uploadWithUploadTokenPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    return await promiseToFuture(jsUploadWithUploadTokenPart(sessionId,
-        filePath, onProgress != null ? js.allowInterop(onProgress) : null));
+    return await promiseToFuture(jsUploadWithUploadTokenPart(
+        sessionId,
+        await promiseToFuture(jsGetBlobFromPath(filePath)),
+        onProgress != null ? js.allowInterop(onProgress) : null));
   }
 
   @override
   Future<String> uploadWithUploadTokenLastPart(
       String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    return await promiseToFuture(jsUploadWithUploadTokenLastPart(sessionId,
-        filePath, onProgress != null ? js.allowInterop(onProgress) : null));
+    return await promiseToFuture(jsUploadWithUploadTokenLastPart(
+        sessionId,
+        await promiseToFuture(jsGetBlobFromPath(filePath)),
+        onProgress != null ? js.allowInterop(onProgress) : null));
   }
 
   // progressive upload with api key
@@ -123,24 +128,18 @@ class ApiVideoUploaderPlugin extends ApiVideoUploaderPlatform {
   @override
   Future<String> uploadPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    return await promiseToFuture(jsUploadWithUploadTokenPart(sessionId,
-        filePath, onProgress != null ? js.allowInterop(onProgress) : null));
+    return await promiseToFuture(jsUploadWithUploadTokenPart(
+        sessionId,
+        await promiseToFuture(jsGetBlobFromPath(filePath)),
+        onProgress != null ? js.allowInterop(onProgress) : null));
   }
 
   @override
   Future<String> uploadLastPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    return await promiseToFuture(jsUploadWithUploadTokenLastPart(sessionId,
-        filePath, onProgress != null ? js.allowInterop(onProgress) : null));
+    return await promiseToFuture(jsUploadWithUploadTokenLastPart(
+        sessionId,
+        await promiseToFuture(jsGetBlobFromPath(filePath)),
+        onProgress != null ? js.allowInterop(onProgress) : null));
   }
-}
-
-class ApplicationName {
-  ApplicationName({
-    required this.name,
-    required this.version,
-  });
-
-  String name;
-  String version;
 }
