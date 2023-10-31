@@ -1,6 +1,11 @@
 # Changelog
 All changes to this project will be documented in this file.
 
+## [1.2.0] - 2023-10-31
+- Add upload with upload token and video id
+- Add upload in background for Android through WorkManager
+- Refactor Android and iOS to share the code with React Native
+
 ## [1.1.0] - 2022-07-05
 - Add web support
 
