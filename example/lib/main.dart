@@ -108,10 +108,10 @@ class UploaderPageState extends State<UploaderPage> {
                   } on Exception catch (e) {
                     log("Failed to upload video: $e");
                     showErrorSnackBar(
-                        context, "Failed to upload video: ${(e).message}");
+                        context, "Failed to upload video: ${e.message}");
                   } catch (e) {
                     log("Failed to upload video: $e");
-                    showErrorSnackBar(context, "Failed to upload video");
+                    showErrorSnackBar(context, "Failed to upload video $e");
                   }
                 }
               },
