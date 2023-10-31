@@ -73,7 +73,8 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   Future<String> uploadWithUploadToken(
     String token,
     String filePath,
-    String fileName, [
+    String fileName,
+    String? videoId, [
     OnProgress? onProgress,
   ]) async {
     var videoJson = await _uploadChannel.invokeMethod(
@@ -81,6 +82,7 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
         <String, dynamic>{
           'token': token,
           'filePath': filePath,
+          'videoId': videoId,
         },
         onProgress);
     return videoJson;
@@ -106,19 +108,26 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   // Progressive upload with upload token
   /// Creates a progressive upload session for [videoId].
   @override
-  void createProgressiveUploadWithUploadTokenSession(String token) {
-    _channel.invokeMethod('createProgressiveUploadWithUploadTokenSession',
-        <String, dynamic>{'token': token});
+  void createProgressiveUploadWithUploadTokenSession(
+      String sessionId, String token, String? videoId) {
+    _channel.invokeMethod(
+        'createProgressiveUploadWithUploadTokenSession', <String, dynamic>{
+      'sessionId': sessionId,
+      'token': token,
+      'videoId': videoId
+    });
   }
 
   /// Uploads a part of a large video file.
   ///
   /// Get upload progression with [onProgress].
   @override
-  Future<String> uploadWithUploadTokenPart(String token, String filePath,
+  Future<String> uploadWithUploadTokenPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    return await _uploadChannel.invokeMethod('uploadPart',
-        <String, dynamic>{'token': token, 'filePath': filePath}, onProgress);
+    return await _uploadChannel.invokeMethod(
+        'uploadPart',
+        <String, dynamic>{'sessionId': sessionId, 'filePath': filePath},
+        onProgress);
   }
 
   /// Uploads the last part of a large video file.
@@ -127,17 +136,21 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   ///
   /// Get upload progression with [onProgress].
   @override
-  Future<String> uploadWithUploadTokenLastPart(String token, String filePath,
+  Future<String> uploadWithUploadTokenLastPart(
+      String sessionId, String filePath,
       [OnProgress? onProgress]) async {
-    return await _uploadChannel.invokeMethod('uploadLastPart',
-        <String, dynamic>{'token': token, 'filePath': filePath}, onProgress);
+    return await _uploadChannel.invokeMethod(
+        'uploadLastPart',
+        <String, dynamic>{'sessionId': sessionId, 'filePath': filePath},
+        onProgress);
   }
 
   // Progressive upload
   /// Creates a progressive upload session with upload [token].
   @override
-  void createProgressiveUploadSession(String videoId) {
+  void createProgressiveUploadSession(String sessionId, String videoId) {
     _channel.invokeMethod('createProgressiveUploadSession', <String, dynamic>{
+      'sessionId': sessionId,
       'videoId': videoId,
     });
   }
@@ -147,11 +160,11 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// You have to set the API key with [setApiKey] before.
   ///
   /// Get upload progression with [onProgress].
-  Future<String> uploadPart(String videoId, String filePath,
+  Future<String> uploadPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
     return await _uploadChannel.invokeMethod(
         'uploadPart',
-        <String, dynamic>{'videoId': videoId, 'filePath': filePath},
+        <String, dynamic>{'sessionId': sessionId, 'filePath': filePath},
         onProgress);
   }
 
@@ -162,12 +175,23 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   /// Once called, you must not use this progressive upload session anymore.
   ///
   /// Get upload progression with [onProgress].
-  Future<String> uploadLastPart(String videoId, String filePath,
+  Future<String> uploadLastPart(String sessionId, String filePath,
       [OnProgress? onProgress]) async {
     return await _uploadChannel.invokeMethod(
         'uploadLastPart',
-        <String, dynamic>{'videoId': videoId, 'filePath': filePath},
+        <String, dynamic>{'sessionId': sessionId, 'filePath': filePath},
         onProgress);
+  }
+
+  /// Cleans up the resources associated with this session.
+  void disposeProgressiveUploadSession(String sessionId) {
+    _channel.invokeMethod('disposeProgressiveUploadSession',
+        <String, dynamic>{'sessionId': sessionId});
+  }
+
+  /// Cancels all the uploads.
+  Future<void> cancelAll() async {
+    await _channel.invokeMethod('cancelAll');
   }
 }
 
@@ -201,9 +225,8 @@ class _UploadChannel {
     if (event["type"] == "progressChanged") {
       final String id = event["uploadId"];
       if (_onProgressMap[id] != null) {
-        final int bytesSent = event["bytesSent"];
-        final int totalBytes = event["totalBytes"];
-        _onProgressMap[id]!(bytesSent, totalBytes);
+        final double progress = event["progress"];
+        _onProgressMap[id]!(progress);
       }
     } else {
       print("Unknown event type: ${event["type"]}");

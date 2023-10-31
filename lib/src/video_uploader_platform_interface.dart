@@ -8,7 +8,7 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  final String sdkVersion = '1.1.0';
+  final String sdkVersion = '1.2.0';
 
   static ApiVideoUploaderPlatform _instance = _PlatformImplementation();
 
@@ -48,7 +48,8 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
   Future<String> uploadWithUploadToken(
     String token,
     String filePath,
-    String fileName, [
+    String fileName,
+    String? videoId, [
     OnProgress? onProgress,
   ]) {
     throw UnimplementedError(
@@ -62,37 +63,50 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
   }
 
   // Progressive upload with upload token
-  void createProgressiveUploadWithUploadTokenSession(String token) {
+  void createProgressiveUploadWithUploadTokenSession(
+      String sessionId, String token, String? videoId) {
     throw UnimplementedError(
       'createProgressiveUploadSession() has not been implemented.',
     );
   }
 
-  Future<String> uploadWithUploadTokenPart(String token, String filePath,
+  Future<String> uploadWithUploadTokenPart(String sessionId, String filePath,
       [OnProgress? onProgress]) {
     throw UnimplementedError('uploadPart() has not been implemented.');
   }
 
-  Future<String> uploadWithUploadTokenLastPart(String token, String filePath,
+  Future<String> uploadWithUploadTokenLastPart(
+      String sessionId, String filePath,
       [OnProgress? onProgress]) {
     throw UnimplementedError('uploadLastPart() has not been implemented.');
   }
 
   // Progressive upload
-  void createProgressiveUploadSession(String videoId) {
+  void createProgressiveUploadSession(String sessionId, String videoId) {
     throw UnimplementedError(
       'createProgressiveUploadSession() has not been implemented.',
     );
   }
 
-  Future<String> uploadPart(String videoId, String filePath,
+  Future<String> uploadPart(String sessionId, String filePath,
       [OnProgress? onProgress]) {
     throw UnimplementedError('uploadPart() has not been implemented.');
   }
 
-  Future<String> uploadLastPart(String videoId, String filePath,
+  Future<String> uploadLastPart(String sessionId, String filePath,
       [OnProgress? onProgress]) {
     throw UnimplementedError('uploadLastPart() has not been implemented.');
+  }
+
+  void disposeProgressiveUploadSession(String sessionId) {
+    throw UnimplementedError(
+      'disposeProgressiveUploadSession() has not been implemented.',
+    );
+  }
+
+  // Cancellation
+  Future<void> cancelAll() {
+    throw UnimplementedError('cancelAll() has not been implemented.');
   }
 }
 

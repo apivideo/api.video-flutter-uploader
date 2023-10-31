@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="read_permission_required">Permission required</string>
+    <string name="read_permission_required_message">You have to grant the read permission to upload the video.</string>
+
+    <string name="unknown_error">Unknown error</string>
+
+    <string name="upload_cancel">Upload cancelled</string>
+    <string name="upload_with_upload_token_cancelled">Upload with upload token cancelled</string>
+    <string name="upload_failed">Upload failed</string>
+    <string name="upload_with_upload_token_failed">Upload with upload token failed</string>
+
+    <string name="upload_notification_channel_name">Video uploader</string>
+</resources>
