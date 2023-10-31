@@ -49,23 +49,6 @@ dependencies:
   video_uploader: ^1.1.0
 ```
 
-### For web usage
-
-Add the api.video TypeScript uploader script to your `web/index.html` head.
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    ...
-    <script src="https://unpkg.com/@api.video/video-uploader" defer></script>
-</head>
-<body>
-...
-</body>
-</html>
-```
-
 ## Android
 
 ### Permissions
