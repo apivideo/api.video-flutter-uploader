@@ -74,7 +74,7 @@ overwriting the following resources in your own application resources:
 ```dart
 import 'package:video_uploader/video_uploader.dart';
 
-var video = await ApiVideoUploader.uploadWithUploadToken("MY_VIDEO_TOKEN", "path/to/my-video.mp4");
+var video = await ApiVideoUploader.uploadWithUploadToken("UPLOAD_TOKEN", "path/to/my-video.mp4");
 ```
 
 # Dependencies
