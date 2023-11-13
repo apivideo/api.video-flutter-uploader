@@ -1,3 +1,4 @@
+<!--<documentation_excluded>-->
 [![badge](https://img.shields.io/twitter/follow/api_video?style=social)](https://twitter.com/intent/follow?screen_name=api_video)
 &nbsp; [![badge](https://img.shields.io/github/stars/apivideo/api.video-flutter-uploader?style=social)](https://github.com/apivideo/api.video-flutter-uploader)
 &nbsp; [![badge](https://img.shields.io/discourse/topics?server=https%3A%2F%2Fcommunity.api.video)](https://community.api.video)
@@ -8,7 +9,7 @@
 video APIs for integrating, scaling, and managing on-demand & low latency live streaming features in
 your app.
 
-# Table of contents
+## Table of contents
 
 - [Table of contents](#table-of-contents)
 - [Project description](#project-description)
@@ -22,7 +23,20 @@ your app.
 - [Dependencies](#dependencies)
 - [FAQ](#faq)
 
-# Project description
+<!--</documentation_excluded>-->
+<!--<documentation_only>
+---
+title: api.video Flutter video uploader
+meta: 
+  description: The official api.video Flutter video uploader for api.video. [api.video](https://api.video/) is the video infrastructure for product builders. Lightning fast video APIs for integrating, scaling, and managing on-demand & low latency live streaming features in your app.
+---
+
+# api.video Flutter video uploader
+
+[api.video](https://api.video/) is the video infrastructure for product builders. Lightning fast video APIs for integrating, scaling, and managing on-demand & low latency live streaming features in your app.
+
+</documentation_only>-->
+## Project description
 
 api.video's Flutter uploader uploads videos to api.video using delegated upload token or API Key.
 
@@ -32,9 +46,9 @@ It allows you to upload videos in two ways:
 - progressive upload: to send a video file by chunks, without needing to know the final size of the
   video file
 
-# Getting started
+## Getting started
 
-## Installation
+### Installation
 
 Run this command:
 
@@ -49,9 +63,9 @@ dependencies:
   video_uploader: ^1.2.0
 ```
 
-## Android
+### Android
 
-### Permissions
+#### Permissions
 
 Permissions `android.permission.READ_MEDIA_VIDEO` (for API 33+)
 or `android.permission.READ_EXTERNAL_STORAGE` (for API < 33) will be requested by this library at
@@ -60,7 +74,7 @@ runtime.
 The uploader comes with a notification to show the progress. So if your application targets Android
 33+, you might request `android.permission.POST_NOTIFICATIONS` permission at runtime.
 
-### Notifications
+#### Notifications
 
 To customize the notification to your own brand, you can change the icon, color or channel name by
 overwriting the following resources in your own application resources:
@@ -69,7 +83,7 @@ overwriting the following resources in your own application resources:
 - the color: `R.color.upload_notification_color`
 - the channel name: `R.string.upload_notification_channel_name`
 
-## Code sample
+### Code sample
 
 ```dart
 import 'package:video_uploader/video_uploader.dart';
@@ -77,7 +91,7 @@ import 'package:video_uploader/video_uploader.dart';
 var video = await ApiVideoUploader.uploadWithUploadToken("UPLOAD_TOKEN", "path/to/my-video.mp4");
 ```
 
-# Dependencies
+## Dependencies
 
 This project is using external library
 
@@ -86,7 +100,7 @@ This project is using external library
 | Swift-video-uploader   | [Swift-video-uploader](https://github.com/apivideo/api.video-swift-uploader)     |
 | android-video-uploader | [android-video-uploader](https://github.com/apivideo/api.video-android-uploader) |
 
-# FAQ
+## FAQ
 
 If you have any questions, ask us in the [community](https://community.api.video) or
 use [Issues](https://github.com/apivideo/api.video-flutter-uploader/issues).
