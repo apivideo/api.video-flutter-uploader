@@ -74,6 +74,16 @@ runtime.
 The uploader comes with a notification to show the progress. So if your application targets Android
 33+, you might request `android.permission.POST_NOTIFICATIONS` permission at runtime.
 
+When targeting Android API Level 34+, you must declare the service type in your application's manifest file.
+In your `AndroidManifest.xml` file, add the following lines in the `<application>` tag:
+
+```xml
+    <service
+        android:name="androidx.work.impl.foreground.SystemForegroundService"
+        android:foregroundServiceType="location|dataSync"
+        tools:node="merge" />
+```
+
 #### Notifications
 
 To customize the notification to your own brand, you can change the icon, color or channel name by
