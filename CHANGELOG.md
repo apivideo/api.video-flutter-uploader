@@ -1,6 +1,9 @@
 # Changelog
 All changes to this project will be documented in this file.
 
+## [1.2.1] - 2023-12-15
+- Fix crash when targeting Android API level >= 34
+
 ## [1.2.0] - 2023-10-31
 - Add upload with upload token and video id
 - Add upload in background for Android through WorkManager

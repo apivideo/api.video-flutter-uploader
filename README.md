@@ -59,7 +59,7 @@ This will add the following lines to your package's pubspec.yaml file:
 
 ``` yaml
 dependencies:
-  video_uploader: ^1.2.0
+  video_uploader: ^1.2.1
 ```
 
 ### Android
