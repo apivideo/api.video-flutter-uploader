@@ -15,7 +15,6 @@ your app.
 - [Project description](#project-description)
 - [Getting started](#getting-started)
     - [Installation](#installation)
-        - [For web usage](#for-web-usage)
     - [Android](#android)
         - [Permissions](#permissions)
         - [Notifications](#notifications)
@@ -98,7 +97,7 @@ overwriting the following resources in your own application resources:
 ```dart
 import 'package:video_uploader/video_uploader.dart';
 
-var video = await ApiVideoUploader.uploadWithUploadToken("UPLOAD_TOKEN", "path/to/my-video.mp4");
+var video = await ApiVideoUploader.uploadWithUploadToken("YOUR_UPLOAD_TOKEN", "path/to/my-video.mp4");
 ```
 
 ## Dependencies
