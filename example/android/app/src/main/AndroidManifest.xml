@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="video.api.flutter.uploader.example">
+    xmlns:tools="http://schemas.android.com/tools">
     
     <application
         android:icon="@drawable/ic_api_video"

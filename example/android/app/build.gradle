@@ -35,7 +35,7 @@ android {
 
         minSdk 21
         compileSdk 34
-        targetSdk 34
+        targetSdk flutter.targetSdkVersion
 
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -48,6 +48,17 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    namespace 'video.api.flutter.uploader.example'
 }
 
 flutter {
