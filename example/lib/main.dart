@@ -76,7 +76,7 @@ class UploaderPageState extends State<UploaderPage> {
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: primaryColor, width: 2.0),
                 ),
-                hintText: 'My video token',
+                hintText: 'Your upload token',
               ),
               controller: _tokenTextController,
             ),
