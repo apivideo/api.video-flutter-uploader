@@ -1,4 +1,4 @@
-#import "UploaderPlugin.h"
+#import "ApiVideoUploaderPlugin.h"
 #if __has_include(<video_uploader/video_uploader-Swift.h>)
 #import <video_uploader/video_uploader-Swift.h>
 #else
@@ -8,7 +8,7 @@
 #import "video_uploader-Swift.h"
 #endif
 
-@implementation UploaderPlugin
+@implementation ApiVideoUploaderPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   [SwiftUploaderPlugin registerWithRegistrar:registrar];
 }

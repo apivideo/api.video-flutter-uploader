@@ -31,10 +31,10 @@ flutter:
       android:
         package: video.api.flutter.uploader
         dartPluginClass: ApiVideoMobileUploaderPlugin
-        pluginClass: UploaderPlugin
+        pluginClass: ApiVideoUploaderPlugin
       ios:
         dartPluginClass: ApiVideoMobileUploaderPlugin
-        pluginClass: UploaderPlugin
+        pluginClass: ApiVideoUploaderPlugin
       web:
         pluginClass: ApiVideoUploaderPlugin
         fileName: src/web/apivideo_uploader_web.dart

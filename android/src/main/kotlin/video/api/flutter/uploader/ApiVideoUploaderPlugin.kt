@@ -6,7 +6,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 
-class UploaderPlugin : FlutterPlugin, ActivityAware {
+class ApiVideoUploaderPlugin : FlutterPlugin, ActivityAware {
     private val uploaderLiveDataHost = UploaderLiveDataHost()
     private var permissionManager: PermissionManager? = null
     private var methodCallHandlerImpl: MethodCallHandlerImpl? = null
