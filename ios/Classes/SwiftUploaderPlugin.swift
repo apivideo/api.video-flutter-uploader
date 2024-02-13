@@ -168,15 +168,39 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
         }
     }
 
+    private func convertStringToDictionary(text: String) -> [String:AnyObject]? {
+        if let data = text.data(using: .utf8) {
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+            } catch {
+                print("Error: \(error) for \(text)")
+            }
+        }
+        return nil
+    }
+    
     private func handleError(error: Error, result: @escaping FlutterResult) {
-        print(error)
         if case let ErrorResponse.error(code, data, _, error) = error {
             var details: String?
-            if let data = data {
+            if let data {
                 details = String(decoding: data, as: UTF8.self)
             }
-            result(FlutterError(code: String(code), message: error.localizedDescription, details: details))
+            
+            print("\(error.localizedDescription): \(details ?? "no details")")
+            
+            var detailsDict: [String: AnyObject]?
+            if let details {
+                detailsDict = convertStringToDictionary(text: details)
+            }
+            
+            if let detailsDict,
+               let title = detailsDict["title"] as? String {
+                result(FlutterError(code: String(code), message: title, details: details))
+            } else {
+                result(FlutterError(code: String(code), message: error.localizedDescription, details: details))
+            }
         } else {
+            print(error)
             result(FlutterError(code: "error", message: error.localizedDescription, details: nil))
         }
     }
