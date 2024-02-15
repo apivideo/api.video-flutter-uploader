@@ -1,6 +1,10 @@
 # Changelog
 All changes to this project will be documented in this file.
 
+## [1.2.2] - 2024-02-15
+- iOS: improve returned error message
+- Android: Upgrade to gradle 8, AGP and Kotlin to 1.9
+
 ## [1.2.1] - 2023-12-15
 - Fix crash when targeting Android API level >= 34
 

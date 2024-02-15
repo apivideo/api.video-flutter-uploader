@@ -49,7 +49,7 @@ It allows you to upload videos in two ways:
 
 ### Installation
 
-Run this command:
+Run the following command at the root of your project:
 
 ```bash
 flutter pub add video_uploader
@@ -59,7 +59,7 @@ This will add the following lines to your package's pubspec.yaml file:
 
 ``` yaml
 dependencies:
-  video_uploader: ^1.2.1
+  video_uploader: ^1.2.2
 ```
 
 ### Android
