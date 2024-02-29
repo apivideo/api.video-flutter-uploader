@@ -1,6 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-    
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <application
         android:icon="@drawable/ic_api_video"
         android:label="FltUploader">
@@ -44,8 +43,8 @@
 
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="location|dataSync"
-            tools:node="merge" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

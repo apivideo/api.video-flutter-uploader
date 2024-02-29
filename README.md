@@ -77,10 +77,11 @@ When targeting Android API Level 34+, you must declare the service type in your 
 In your `AndroidManifest.xml` file, add the following lines in the `<application>` tag:
 
 ```xml
-    <service
-        android:name="androidx.work.impl.foreground.SystemForegroundService"
-        android:foregroundServiceType="location|dataSync"
-        tools:node="merge" />
+
+<service 
+    android:name="androidx.work.impl.foreground.SystemForegroundService"
+    android:exported="false" 
+    android:foregroundServiceType="dataSync" />
 ```
 
 #### Notifications
