@@ -163,6 +163,14 @@ public class SwiftUploaderPlugin: NSObject, FlutterPlugin {
             }
         case "cancelAll":
             uploadModule.cancelAll()
+        case "cancelByVideoId":
+            if let args = call.arguments as? [String: Any],
+               let videoId = args["videoId"] as? String
+            {
+                uploadModule.cancelByVideoId(videoId: videoId);
+            }else{
+                result(FlutterError(code: "missing_parameters",message : "video id is missing",details: nil))
+            }
         default:
             result(FlutterMethodNotImplemented)
         }

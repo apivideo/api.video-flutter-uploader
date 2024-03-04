@@ -267,6 +267,27 @@ class MethodCallHandlerImpl(
                     result.error("failed_to_cancel", "Failed to cancel", error)
                 })
             }
+            "cancelByVideoId" -> {
+                val videoId = call.argument<String>("videoId");
+                when {
+                    (videoId == null) -> {
+                        result.error(
+                            "missing_video_id", "Videoid is missing", null
+                        )
+                    }
+
+                    else -> {
+                        uploaderModuleImpl.cancelByVideoId(
+                            videoId,
+                            {
+                            result.success(null)
+                        }, { error ->
+                            result.error("failed_to_cancel", "Failed to cancel", error)
+                        })
+                    }
+                }
+
+            }
 
             else -> result.notImplemented()
         }
