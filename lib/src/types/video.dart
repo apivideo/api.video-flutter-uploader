@@ -72,4 +72,10 @@ class Video {
 
   /// Creates a json map from a [Video].
   Map<String, dynamic> toJson() => _$VideoToJson(this);
+
+  /// Returns a string representation of this object.
+  @override
+  String toString() {
+    return 'Video{${toJson().toString()}';
+  }
 }

@@ -29,4 +29,10 @@ class VideoAssets {
 
   /// Creates a json map from a [VideoAssets].
   Map<String, dynamic> toJson() => _$VideoAssetsToJson(this);
+
+  /// Returns a string representation of this object.
+  @override
+  String toString() {
+    return 'VideoAssets{${toJson().toString()}';
+  }
 }

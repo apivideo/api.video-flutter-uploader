@@ -22,4 +22,10 @@ class VideoSource {
 
   /// Creates a json map from a [VideoSource].
   Map<String, dynamic> toJson() => _$VideoSourceToJson(this);
+
+  /// Returns a string representation of this object.
+  @override
+  String toString() {
+    return 'VideoSource{${toJson().toString()}';
+  }
 }
