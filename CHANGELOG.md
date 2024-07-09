@@ -1,6 +1,11 @@
 # Changelog
 All changes to this project will be documented in this file.
 
+## [1.2.3] - 2024-07-09
+- Android: fix crash on release due to minification
+- Android: use plugin instead of imperative apply in `build.gradle`
+- Override `toString` for `Video` class
+
 ## [1.2.2] - 2024-02-15
 - iOS: improve returned error message
 - Android: Upgrade to gradle 8, AGP and Kotlin to 1.9
