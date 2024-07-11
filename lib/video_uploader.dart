@@ -101,6 +101,12 @@ class ApiVideoUploader {
   static cancelAll() {
     return _uploaderPlatform.cancelAll();
   }
+
+  /// Cancels upload based on video ID
+  static cancelByVideoID({required String videoId}) async{
+    return _uploaderPlatform.cancelByVideoID(videoId : videoId);
+  }
+  
 }
 
 /// A session that manages progressive upload with upload token.
