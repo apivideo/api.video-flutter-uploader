@@ -20,7 +20,7 @@ import androidx.lifecycle.LifecycleRegistry
 internal class ProxyLifecycleProvider(activity: Activity) :
     Application.ActivityLifecycleCallbacks, LifecycleOwner {
     @VisibleForTesting
-    val lifecycle = LifecycleRegistry(this)
+    override val lifecycle = LifecycleRegistry(this)
 
     private val registrarActivityHashCode: Int = activity.hashCode()
 
@@ -70,9 +70,5 @@ internal class ProxyLifecycleProvider(activity: Activity) :
         }
         activity.application.unregisterActivityLifecycleCallbacks(this)
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    }
-
-    override fun getLifecycle(): Lifecycle {
-        return lifecycle
     }
 }
