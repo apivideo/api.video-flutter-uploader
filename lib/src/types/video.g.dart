@@ -17,6 +17,17 @@ Video _$VideoFromJson(Map<String, dynamic> json) => Video(
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
+      discardedAt: json['discardedAt'] == null
+          ? null
+          : DateTime.parse(json['discardedAt'] as String),
+      deletesAt: json['deletesAt'] == null
+          ? null
+          : DateTime.parse(json['deletesAt'] as String),
+      discarded: json['discarded'] as bool?,
+      language: _$JsonConverterFromJson<String, Locale>(
+          json['language'], const _JsonLocaleConverter().fromJson),
+      languageOrigin:
+          $enumDecodeNullable(_$LanguageOriginEnumMap, json['languageOrigin']),
       tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
       metadata: (json['metadata'] as List<dynamic>?)
           ?.map((e) => Metadata.fromJson(e as Map<String, dynamic>))
@@ -40,6 +51,12 @@ Map<String, dynamic> _$VideoToJson(Video instance) => <String, dynamic>{
       'description': instance.description,
       'publishedAt': instance.publishedAt,
       'updatedAt': instance.updatedAt?.toIso8601String(),
+      'discardedAt': instance.discardedAt?.toIso8601String(),
+      'deletesAt': instance.deletesAt?.toIso8601String(),
+      'discarded': instance.discarded,
+      'language': _$JsonConverterToJson<String, Locale>(
+          instance.language, const _JsonLocaleConverter().toJson),
+      'languageOrigin': _$LanguageOriginEnumMap[instance.languageOrigin],
       'tags': instance.tags,
       'metadata': instance.metadata,
       'source': instance.source,
@@ -49,3 +66,20 @@ Map<String, dynamic> _$VideoToJson(Video instance) => <String, dynamic>{
       'panoramic': instance.panoramic,
       'mp4Support': instance.mp4Support,
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+const _$LanguageOriginEnumMap = {
+  LanguageOrigin.api: 'api',
+  LanguageOrigin.auto: 'auto',
+};
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);
