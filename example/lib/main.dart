@@ -103,15 +103,21 @@ class UploaderPageState extends State<UploaderPage> {
                     });
                     log("VideoId : ${video.videoId}");
                     log("Title : ${video.title}");
-                    showSuccessSnackBar(
-                        context, "Video ${video.videoId} uploaded");
+                    if (context.mounted) {
+                      showSuccessSnackBar(
+                          context, "Video ${video.videoId} uploaded");
+                    }
                   } on Exception catch (e) {
                     log("Failed to upload video: $e");
-                    showErrorSnackBar(
-                        context, "Failed to upload video: ${e.message}");
+                    if (context.mounted) {
+                      showErrorSnackBar(
+                          context, "Failed to upload video: ${e.message}");
+                    }
                   } catch (e) {
                     log("Failed to upload video: $e");
-                    showErrorSnackBar(context, "Failed to upload video $e");
+                    if (context.mounted) {
+                      showErrorSnackBar(context, "Failed to upload video $e");
+                    }
                   }
                 }
               },
@@ -147,28 +153,14 @@ class UploaderPageState extends State<UploaderPage> {
   }
 
   void showSuccessSnackBar(BuildContext context, String message) {
-    showSnackBar(context, message, backgroundColor: Colors.green);
+    context.showSnackBar(message, backgroundColor: Colors.green);
   }
 
   void showErrorSnackBar(BuildContext context, String message) {
-    showSnackBar(context, message,
+    context.showSnackBar(message,
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 60),
         showCloseIcon: true);
-  }
-
-  void showSnackBar(BuildContext context, String message,
-      {Color? backgroundColor,
-      Duration duration = const Duration(seconds: 4),
-      bool showCloseIcon = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
-        duration: duration,
-        showCloseIcon: showCloseIcon,
-      ),
-    );
   }
 }
 
@@ -178,5 +170,21 @@ extension ErrorExtension on Exception {
       return (this as PlatformException).message ?? "Unknown error";
     }
     return toString();
+  }
+}
+
+extension BuildContextSnachBarExtension on BuildContext {
+  void showSnackBar(String message,
+      {Color? backgroundColor,
+      Duration duration = const Duration(seconds: 4),
+      bool showCloseIcon = false}) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        duration: duration,
+        showCloseIcon: showCloseIcon,
+      ),
+    );
   }
 }
