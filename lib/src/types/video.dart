@@ -1,9 +1,38 @@
+import 'dart:ui';
+
 import 'package:json_annotation/json_annotation.dart';
+
+import 'metadata.dart';
 import 'video_assets.dart';
 import 'video_source.dart';
-import 'metadata.dart';
 
 part 'video.g.dart';
+
+/// The origin of the last update on the video's `language` attribute.
+enum LanguageOrigin {
+  /// The language was set by the API.
+  @JsonValue("api")
+  api,
+
+  /// The language was done automatically by the API.
+  @JsonValue("auto")
+  auto
+}
+
+/// Json converter for [Locale] objects.
+class _JsonLocaleConverter extends JsonConverter<Locale, String> {
+  const _JsonLocaleConverter();
+
+  @override
+  Locale fromJson(String json) {
+    return Locale(json);
+  }
+
+  @override
+  String toJson(Locale object) {
+    return object.toLanguageTag();
+  }
+}
 
 /// A video from api.video
 @JsonSerializable()
@@ -25,6 +54,22 @@ class Video {
 
   /// The date and time the video was updated. Date and time are provided using ISO-8601 UTC format.
   final DateTime? updatedAt;
+
+  /// The date and time the video was discarded.
+  final DateTime? discardedAt;
+
+  /// The date and time the video will be permanently deleted.
+  final DateTime? deletesAt;
+
+  /// Returns `true` for videos you discarded.
+  final bool? discarded;
+
+  /// Returns the language of a video in [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag) format.
+  @_JsonLocaleConverter()
+  final Locale? language;
+
+  /// Returns the origin of the last update on the video's `language` attribute.
+  final LanguageOrigin? languageOrigin;
 
   /// One array of tags (each tag is a string) in order to categorize a video. Tags may include spaces.
   final List<String>? tags;
@@ -52,12 +97,17 @@ class Video {
   final bool? mp4Support;
 
   /// Creates a [Video].
-  Video(this.videoId,
+  const Video(this.videoId,
       {this.createdAt,
       this.title,
       this.description,
       this.publishedAt,
       this.updatedAt,
+      this.discardedAt,
+      this.deletesAt,
+      this.discarded,
+      this.language,
+      this.languageOrigin,
       this.tags,
       this.metadata,
       this.source,

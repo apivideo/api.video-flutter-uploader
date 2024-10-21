@@ -102,7 +102,7 @@ class UploaderPageState extends State<UploaderPage> {
                       setProgress(progress);
                     });
                     log("VideoId : ${video.videoId}");
-                    log("Title : ${video.title}");
+                    log("Video : $video");
                     if (context.mounted) {
                       showSuccessSnackBar(
                           context, "Video ${video.videoId} uploaded");
