@@ -12,6 +12,24 @@ void main() {
   const MethodChannel channel = const MethodChannel('video.api.uploader');
   ApiVideoUploaderPlatform.instance = ApiVideoMobileUploaderPlugin();
 
+  Video _createDummyVideo(String videoId) {
+    return Video(videoId,
+      createdAt: DateTime.now(),
+      title: "Title",
+      description: "Description",
+      publishedAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      discarded: false,
+      tags: [],
+      metadata: [],
+      source: VideoSource(),
+      assets: VideoAssets(),
+      public: false,
+      panoramic: false,
+      mp4Support: false,
+    );
+  }
+
   test('setEnvironment', () async {
     final environment = Environment.sandbox;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -57,7 +75,7 @@ void main() {
         expect(null, isNot(methodCall.arguments["uploadId"]));
         expect(methodCall.arguments["videoId"], videoId);
         expect(methodCall.arguments["filePath"], filePath);
-        return jsonEncode(Video(videoId).toJson());
+        return jsonEncode(_createDummyVideo(videoId).toJson());
       } else {
         fail("Method not expected: ${methodCall.method}");
       }
@@ -78,7 +96,7 @@ void main() {
         expect(null, isNot(methodCall.arguments["uploadId"]));
         expect(methodCall.arguments["token"], token);
         expect(methodCall.arguments["filePath"], filePath);
-        return jsonEncode(Video(videoId).toJson());
+        return jsonEncode(_createDummyVideo(videoId).toJson());
       } else {
         fail("Method not expected: ${methodCall.method}");
       }
@@ -96,7 +114,7 @@ void main() {
         return null;
       } else if (methodCall.method == "uploadWithUploadToken") {
         expect(null, isNot(methodCall.arguments["uploadId"]));
-        return jsonEncode(Video(videoId).toJson());
+        return jsonEncode(_createDummyVideo(videoId).toJson());
       } else {
         fail("Method not expected: ${methodCall.method}");
       }
@@ -131,7 +149,7 @@ void main() {
         expect(null, isNot(methodCall.arguments["uploadId"]));
         expect(methodCall.arguments["sessionId"], sessionId);
         expect(methodCall.arguments["filePath"], filePath);
-        return jsonEncode(Video(videoId).toJson());
+        return jsonEncode(_createDummyVideo(videoId).toJson());
       } else {
         fail("Method not expected: ${methodCall.method}");
       }
@@ -148,7 +166,7 @@ void main() {
         expect(null, isNot(methodCall.arguments["uploadId"]));
         expect(methodCall.arguments["sessionId"], sessionId);
         expect(methodCall.arguments["filePath"], filePath);
-        return jsonEncode(Video(videoId).toJson());
+        return jsonEncode(_createDummyVideo(videoId).toJson());
       } else {
         fail("Method not expected: ${methodCall.method}");
       }
@@ -184,7 +202,7 @@ void main() {
         expect(null, isNot(methodCall.arguments["uploadId"]));
         expect(methodCall.arguments["sessionId"], sessionId);
         expect(methodCall.arguments["filePath"], filePath);
-        return jsonEncode(Video(videoId).toJson());
+        return jsonEncode(_createDummyVideo(videoId).toJson());
       } else {
         fail("Method not expected: ${methodCall.method}");
       }
@@ -201,11 +219,12 @@ void main() {
         expect(null, isNot(methodCall.arguments["uploadId"]));
         expect(methodCall.arguments["sessionId"], sessionId);
         expect(methodCall.arguments["filePath"], filePath);
-        return jsonEncode(Video(videoId).toJson());
+        return jsonEncode(_createDummyVideo(videoId).toJson());
       } else {
         fail("Method not expected: ${methodCall.method}");
       }
     });
     expect((await session.uploadLastPart(filePath)).videoId, videoId);
   });
+
 }
