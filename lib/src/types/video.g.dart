@@ -7,10 +7,11 @@ part of 'video.dart';
 // **************************************************************************
 
 Video _$VideoFromJson(Map<String, dynamic> json) => Video(
-      json['videoId'] as String, createdAt: DateTime.parse(json['createdAt'] as String),
+      json['videoId'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
       title: json['title'] as String,
       description: json['description'] as String,
-      publishedAt: json['publishedAt'] as String,
+      publishedAt: DateTime.parse(json['publishedAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       discardedAt: json['discardedAt'] == null
           ? null
@@ -40,7 +41,7 @@ Map<String, dynamic> _$VideoToJson(Video instance) => <String, dynamic>{
       'createdAt': instance.createdAt.toIso8601String(),
       'title': instance.title,
       'description': instance.description,
-      'publishedAt': instance.publishedAt,
+      'publishedAt': instance.publishedAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
       'discardedAt': instance.discardedAt?.toIso8601String(),
       'deletesAt': instance.deletesAt?.toIso8601String(),
