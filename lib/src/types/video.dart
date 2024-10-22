@@ -50,7 +50,7 @@ class Video {
   final String description;
 
   /// The date and time the API created the video. Date and time are provided using ISO-8601 UTC format.
-  final String publishedAt;
+  final DateTime publishedAt;
 
   /// The date and time the video was updated. Date and time are provided using ISO-8601 UTC format.
   final DateTime updatedAt;
