@@ -2,6 +2,12 @@
 
 All changes to this project will be documented in this file.
 
+## [1.3.0] - 2024-10-29
+
+- Fix `publishedAt` type in `Video` class
+- Improve `Video` class members nullability
+- Add `Video` class new members: `language`, `discardedAt`,...
+
 ## [1.2.4] - 2024-08-13
 
 - Android: fix crash due to `ProxyLifecycleProvider` `getLifecycle`
