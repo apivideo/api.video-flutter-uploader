@@ -3,6 +3,7 @@ import ApiVideoUploader
 public class UploaderModule: NSObject {
     private var progressiveUploadSessions: [String: ProgressiveUploadSessionProtocol] = [:]
     private var uploadRequests: [RequestTask] = []
+    private var videoIds: [String] = []
 
     @objc(setSdkName:::)
     func setSdkName(name: String, version: String) throws {
@@ -56,6 +57,7 @@ public class UploaderModule: NSObject {
             self.handleCompletion(video: video, error: error, onSuccess: onSuccess, onError: onError)
         }
         uploadRequests.append(request)
+        videoIds.append(videoId ?? "")
     }
 
     @objc(upload::::::)
@@ -64,6 +66,10 @@ public class UploaderModule: NSObject {
             self.handleCompletion(video: video, error: error, onSuccess: onSuccess, onError: onError)
         }
         uploadRequests.append(request)
+        if(videoIds.contains(videoId)){   
+        }else{
+            videoIds.append(videoId)
+        }
     }
 
     @objc(createUploadProgressiveSession:::)
@@ -114,6 +120,19 @@ public class UploaderModule: NSObject {
             request.cancel()
         }
         uploadRequests.removeAll()
+        videoIds.removeAll();
+    }
+
+    @objc(cancelByVideoId:)
+    func cancelByVideoId(videoId: String){
+        if let index = videoIds.firstIndex(of: videoId){
+            let request = uploadRequests[index];
+            request.cancel();
+            uploadRequests.remove(at: index);
+        }else{
+            print("Already Completed or Cancelled");
+        } 
+        
     }
 
     private func handleCompletion(video: Video?, error: Error?, onSuccess: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
