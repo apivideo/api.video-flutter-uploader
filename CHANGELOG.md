@@ -2,6 +2,11 @@
 
 All changes to this project will be documented in this file.
 
+## [1.3.1] - 2025-01-15
+
+- Fix `Video` class `language` type
+
+
 ## [1.3.0] - 2024-10-29
 
 - Fix `publishedAt` type in `Video` class

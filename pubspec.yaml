@@ -1,6 +1,6 @@
 name: video_uploader
 description: This flutter plugin is an easy way to upload video to api.video.
-version: 1.3.0
+version: 1.3.1
 repository: https://github.com/apivideo/api.video-flutter-uploader
 issue_tracker: https://github.com/apivideo/api.video-flutter-uploader/issues
 homepage: https://api.video
