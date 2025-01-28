@@ -193,6 +193,16 @@ class ApiVideoMobileUploaderPlugin extends ApiVideoUploaderPlatform {
   Future<void> cancelAll() async {
     await _channel.invokeMethod('cancelAll');
   }
+
+  /// Cancels video upload by video ID
+  Future<void> cancelByVideoID({required String videoId}) async{
+    await _channel.invokeMethod(
+      'cancelByVideoId',
+      <String,dynamic>{
+        'videoId': videoId,
+      },
+    );
+  }
 }
 
 /// A wrapper around upload calls to manage progress callback.

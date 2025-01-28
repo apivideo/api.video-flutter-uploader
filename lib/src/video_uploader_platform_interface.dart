@@ -108,6 +108,10 @@ abstract class ApiVideoUploaderPlatform extends PlatformInterface {
   Future<void> cancelAll() {
     throw UnimplementedError('cancelAll() has not been implemented.');
   }
+
+  Future<void> cancelByVideoID({required String videoId}){
+    throw UnimplementedError('cancelByVideoID() has not been implemented');
+  }
 }
 
 class _PlatformImplementation extends ApiVideoUploaderPlatform {}
